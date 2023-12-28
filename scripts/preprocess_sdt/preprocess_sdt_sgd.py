@@ -45,7 +45,8 @@ def process_interim(data_path:pathlib.Path,
         for row in reader:
             data.append({header: element for header, element in zip(headers, row)})
     logger.info(f"Loaded {len(data)} examples")
-    save_data(data,
+    processed_data = {"data": data}
+    save_data(processed_data,
               output_path,
               metadata=config,
               version=version,
