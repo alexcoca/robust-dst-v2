@@ -23,6 +23,7 @@ import re
 import sys
 from itertools import chain
 from pathlib import Path
+from typing import Union
 
 import datasets
 import nltk  # Here to have a nice missing dependency error message early on
@@ -768,7 +769,7 @@ def main():
         else None,
     )
 
-    def create_and_save_model_config(path: str | Path) -> None:
+    def create_and_save_model_config(path: Union[str,Path]) -> None:
         config = {
             "data": preprocessing_configs,
             "train_arguments": {
