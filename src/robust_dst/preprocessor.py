@@ -9,7 +9,7 @@ from collections import defaultdict
 from typing import Optional
 
 from datasets import Dataset, load_dataset
-from methodflow.pipeline import PipelineMixin
+from robust_dst.pipeline import PipelineMixin
 from tqdm import tqdm
 from transformers import PreTrainedTokenizer
 
