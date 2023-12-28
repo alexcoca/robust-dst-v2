@@ -6,12 +6,12 @@ import logging
 import random
 import re
 from collections import defaultdict
-from typing import Optional
+from typing import Optional, Union
 
 from datasets import Dataset, load_dataset
 from robust_dst.pipeline import PipelineMixin
 from tqdm import tqdm
-from transformers import PreTrainedTokenizer
+from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class Preprocessor(PipelineMixin):
     def __init__(
         self,
         tokenize: bool = True,
-        tokenizer: Optional[PreTrainedTokenizer] = None,
+        tokenizer: Optional[Union[PreTrainedTokenizer, PreTrainedTokenizerFast]] = None,
         max_source_length: int = 1024,
         max_target_length: int = 64,
         padding: bool | str = False,
@@ -60,7 +60,7 @@ class Preprocessor(PipelineMixin):
         """Instantiate a preprocessor object.
 
         Args:
-            tokenizer (PreTrainedTokenizer): The tokenizer to use
+            tokenizer (Union[PreTrainedTokenizer, PreTrainedTokenizerFast], optional): The tokenizer to use
             max_source_length (int, optional): The maximum total input sequence length
                 after tokenization. Defaults to 1024.
             max_target_length (int, optional): The maximum total sequence length for
@@ -86,7 +86,7 @@ class Preprocessor(PipelineMixin):
                 tokenization. Defaults to "".
         """
         self.tokenize = tokenize
-        if self.tokenize and not isinstance(tokenizer, PreTrainedTokenizer):
+        if self.tokenize and not isinstance(tokenizer, (PreTrainedTokenizer, PreTrainedTokenizerFast)):
             raise RuntimeError(
                 "A tokenizer must be specified if tokenization is desired"
             )
