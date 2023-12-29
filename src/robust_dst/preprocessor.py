@@ -268,6 +268,21 @@ class T5DSTPreprocessor(Preprocessor):
             dataset, desc=desc, truncation=truncation, **process_kwargs
         )
 
+class SDTPreprocessor(Preprocessor):
+    def process(
+        self,
+        dataset: Dataset,
+        desc: Optional[str] = None,
+        truncation: bool = True,
+        **process_kwargs,
+    ) -> Dataset:
+        if process_kwargs.get("sample_dialogue", False):
+            raise NotImplementedError(
+                "Sampling from dialogue is not implemented for T5DST"
+            )
+        return super().process(
+            dataset, desc=desc, truncation=truncation, **process_kwargs
+        )
 
 class D3STPreprocessor(Preprocessor):
     class AugmentStyle:
