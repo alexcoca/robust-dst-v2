@@ -59,7 +59,7 @@ from robust_dst.cli import (
 )
 from robust_dst.evaluation import get_metrics
 from robust_dst.parser import D3STParser, T5DSTParser
-from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor
+from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor, SDTPreprocessor
 from robust_dst.scoring_utils import (
     flatten_metrics_dict,
     setup_evaluator_output_dirs,
@@ -425,6 +425,10 @@ def main():
         preprocessor = D3STPreprocessor(
             delimiter=delimiters.pop(),
             domain_in_desc=domain_in_desc,
+            **preprocessor_init_kwargs,
+        )
+    elif "sdt" in data_format:
+        preprocessor = SDTPreprocessor(
             **preprocessor_init_kwargs,
         )
     else:
