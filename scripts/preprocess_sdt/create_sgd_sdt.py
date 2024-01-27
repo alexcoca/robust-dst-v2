@@ -222,6 +222,20 @@ def create_examples_from_dialogue(dialogue: Mapping[
           use_slot_ids=options.use_slot_ids,
           key_to_schema=service_to_schema)
 
+
+      if options.mcq_cat_vals:
+        # We have multiple choice options for categorical values
+        # We need a reverse mapping dictionary to go from the model output which
+        # is a letter to the actual value
+        reverse_mapping = {} # We wish to represent the reverse mapping as a dict
+        for slot, mapping in slot_to_cat_val_to_id.items():
+          reverse_mapping[slot] = {letter: value for value, letter in mapping.items()}
+        # Added the reverse mapping to the prompt string
+        # This will be removed from the prompt when creating the JSON files
+        new_prompt = "[categorical_mapping_prompt]" + str(reverse_mapping) + prompt_str
+        prompt_str = new_prompt
+
+
       # Create context
       context_str = sdt_utils.generate_context_str(utt_strs,
                                                    options.context_format)
