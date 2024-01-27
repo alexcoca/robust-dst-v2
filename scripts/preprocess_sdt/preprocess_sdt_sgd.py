@@ -28,6 +28,18 @@ from robust_dst.utils import (
 
 logger = logging.getLogger(__name__)
 
+
+def extract_categorical_mapping(source):
+    pattern = r"\[categorical_mapping_prompt\](.*?)\[example\](.*)"
+    match = re.match(pattern, source)
+    if not match:
+        raise ValueError(f"Could not find categorical mapping prompt in {source}")
+    mapping = match.group(1)
+    if mapping == "{}":
+        mapping = None
+    source = "[example]" + match.group(2)
+    return mapping, source
+
 def process_interim(data_path:pathlib.Path, 
                     output_path:pathlib.Path,
                     config:DictConfig,
@@ -39,11 +51,14 @@ def process_interim(data_path:pathlib.Path,
     processed that is ready to be used for training."""
     logger.info(f"Processing data from {data_path}")
     data = []
-    headers = ['source', 'target', 'dialogue_id', 'turn_id', 'frame_id']
+    headers = ['categorical_slots_mapping', 'source', 'target', 'dialogue_id', 'turn_id', 'frame_id']
     with open(data_path, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
         for row in reader:
-            data.append({header: element for header, element in zip(headers, row)})
+            source, target, dialogue_id, turn_id, frame_id = row
+            slots_mapping, source = extract_categorical_mapping(source)
+            elements = [slots_mapping, source, target, dialogue_id, turn_id, frame_id]
+            data.append({header: element for header, element in zip(headers, elements)})
     logger.info(f"Loaded {len(data)} examples")
     processed_data = {"data": data}
     save_data(processed_data,
