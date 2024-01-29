@@ -58,7 +58,7 @@ from robust_dst.cli import (
     ModelArguments,
 )
 from robust_dst.evaluation import get_metrics
-from robust_dst.parser import D3STParser, T5DSTParser
+from robust_dst.parser import D3STParser, T5DSTParser, SDTParser
 from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor, SDTPreprocessor
 from robust_dst.scoring_utils import (
     flatten_metrics_dict,
@@ -435,7 +435,6 @@ def main():
         preprocessor = T5DSTPreprocessor(
             **preprocessor_init_kwargs,
         )
-
     if training_args.do_train:
         if "train" not in raw_datasets:
             raise ValueError("--do_train requires a train dataset")
@@ -609,6 +608,11 @@ def main():
             else parser_inputs["preproc_config"]["lowercase"],
             **parser_init_kwargs,
         )
+    elif "sdt" in data_format:
+        parser = SDTParser(
+            data_format=data_format,
+            **parser_init_kwargs,
+        )
     else:
         parser = T5DSTParser(
             data_format=data_format,
@@ -718,6 +722,7 @@ def main():
             file_to_hyp_dials = parser.convert_to_sgd_format(
                 preprocessed_refs=preproc_refs,
                 predictions=predictions,
+                write_to_disk=True
             )
             assert len(predictions) == len(
                 preproc_refs
