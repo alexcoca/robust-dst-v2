@@ -107,6 +107,9 @@ class CustomTrainer(Seq2SeqTrainer):
         hyps_dir, metrics_dir = setup_evaluator_output_dirs(
             self.args, "dev", current_step
         )
+        if self.compute_metrics is None: # No point in doing the following
+            return output.metrics
+
         outputs_to_save = (
             output.metrics.pop(f"{metric_key_prefix}_all_metrics_aggregate"),
             output.metrics.pop(f"{metric_key_prefix}_file_to_hyp_dials"),
