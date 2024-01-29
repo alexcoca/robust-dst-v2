@@ -68,7 +68,7 @@ _TARGET_FORMAT = flags.DEFINE_enum(
     'the target.')
 _ADD_INTENTS = flags.DEFINE_bool('add_intents', False, 'Whether to add '
                                  'intents.')
-_LOWERCASE = flags.DEFINE_bool('lowercase', True,
+_LOWERCASE = flags.DEFINE_bool('lowercase', False,
                                'Whether to lowercase the generated example.')
 _MCQ_CAT_VALS = flags.DEFINE_bool(
     'mcq_cat_vals', False,
@@ -222,7 +222,7 @@ def create_examples_from_dialogue(dialogue: Mapping[
           use_slot_ids=options.use_slot_ids,
           key_to_schema=service_to_schema)
 
-
+      prompt_str = "[service]" + frame['service'] + prompt_str
       if options.mcq_cat_vals:
         # We have multiple choice options for categorical values
         # We need a reverse mapping dictionary to go from the model output which
@@ -232,8 +232,7 @@ def create_examples_from_dialogue(dialogue: Mapping[
           reverse_mapping[slot] = {letter: value for value, letter in mapping.items()}
         # Added the reverse mapping to the prompt string
         # This will be removed from the prompt when creating the JSON files
-        new_prompt = "[categorical_mapping_prompt]" + str(reverse_mapping) + prompt_str
-        prompt_str = new_prompt
+        prompt_str = "[categorical_mapping_prompt]" + str(reverse_mapping) + prompt_str
 
 
       # Create context
