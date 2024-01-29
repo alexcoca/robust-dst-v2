@@ -29,16 +29,17 @@ from robust_dst.utils import (
 logger = logging.getLogger(__name__)
 
 
-def extract_categorical_mapping(source):
-    pattern = r"\[categorical_mapping_prompt\](.*?)\[example\](.*)"
+def extract_categorical_mapping_and_schema_source(source):
+    pattern = r"\[categorical_mapping_prompt\](.*?)\[service\](.*?)\[EXAMPLE\](.*)"
     match = re.match(pattern, source)
     if not match:
-        raise ValueError(f"Could not find categorical mapping prompt in {source}")
+        raise ValueError(f"Source {source} \n didn't match pattern {pattern}")
     mapping = match.group(1)
+    service = match.group(2)
     if mapping == "{}":
         mapping = None
-    source = "[example]" + match.group(2)
-    return mapping, source
+    source = "[example]" + match.group(3).lower()
+    return mapping, service, source
 
 def process_interim(data_path:pathlib.Path, 
                     output_path:pathlib.Path,
@@ -51,13 +52,15 @@ def process_interim(data_path:pathlib.Path,
     processed that is ready to be used for training."""
     logger.info(f"Processing data from {data_path}")
     data = []
-    headers = ['categorical_slots_mapping', 'source', 'target', 'dialogue_id', 'turn_id', 'frame_id']
+    headers = ['categorical_slots_mapping', 'service', 'source', 
+               'target', 'dialogue_id', 'turn_id', 'frame_id']
     with open(data_path, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
         for row in reader:
             source, target, dialogue_id, turn_id, frame_id = row
-            slots_mapping, source = extract_categorical_mapping(source)
-            elements = [slots_mapping, source, target, dialogue_id, turn_id, frame_id]
+            slots_mapping, service, source = extract_categorical_mapping_and_schema_source(
+                source)
+            elements = [slots_mapping, service, source, target, dialogue_id, turn_id, frame_id]
             data.append({header: element for header, element in zip(headers, elements)})
     logger.info(f"Loaded {len(data)} examples")
     processed_data = {"data": data}
