@@ -248,6 +248,9 @@ class CustomTrainer(Seq2SeqTrainer):
         )
 
     def log_config_to_wandb(self, config: dict):
+        if not isinstance(config, dict):
+            logger.warning("Config is not a dict, so not logging to wandb!")
+            return
         if self.state.is_world_process_zero:
             for c in self.callback_handler.callbacks:
                 if isinstance(c, CustomWandbCallback):
