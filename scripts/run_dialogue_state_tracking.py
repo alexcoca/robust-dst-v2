@@ -451,6 +451,7 @@ def main():
                 train_dataset,
                 desc="Running tokenizer on train dataset",
                 augment_style=data_args.augment_style,
+                truncation=False,  # do not truncate inputs when train
                 omit_confirmation_turns=data_args.omit_confirmation_turns,
                 discard_truncated_examples=data_args.discard_truncated_examples,
             )
@@ -475,6 +476,7 @@ def main():
         ):
             eval_dataset = preprocessor.process(
                 eval_dataset,
+                truncation=False,  # do not truncate inputs when eval
                 desc="Running tokenizer on validation dataset",
             )
         if "multiwoz" in data_format:
@@ -673,6 +675,8 @@ def main():
         remove_eos_token_inplace(predictions)
 
         logger.info("Computing metrics")
+        # for pred in predictions:
+        #     logger.warning(f"Prediction: {pred}")
         preproc_refs = parser_inputs["preprocessed_refs"]
 
         if "multiwoz" in data_format:
