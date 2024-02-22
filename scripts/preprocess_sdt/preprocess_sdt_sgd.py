@@ -58,6 +58,7 @@ def process_interim(data_path:pathlib.Path,
         reader = csv.reader(f, delimiter='\t')
         for row in reader:
             source, target, dialogue_id, turn_id, frame_id = row
+            target = target.lower()
             slots_mapping, service, source = extract_categorical_mapping_and_schema_source(
                 source)
             elements = [slots_mapping, service, source, target, dialogue_id, turn_id, frame_id]
