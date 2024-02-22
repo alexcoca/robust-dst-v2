@@ -496,6 +496,14 @@ class CustomSeq2SeqTrainingArguments(Seq2SeqTrainingArguments):
             ),
         },
     )
+    enable_early_stopping_callback: bool = field(
+        default=True,
+        metadata={
+            "help": (
+                "Whether to enable the early stopping callback. "
+            ),
+        },
+    )
     load_best_model_at_end: bool = field(
         default=True,
         metadata={

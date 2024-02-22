@@ -753,11 +753,15 @@ def main():
     early_stopping_callback = EarlyStoppingCallback(
         training_args.early_stopping_patience
     )
+    # if is_wandb_available():
+    #     callbacks = [CacheManagerCallback, early_stopping_callback, CustomWandbCallback]
+    # else:
+    #     callbacks = [CacheManagerCallback, early_stopping_callback]
+    callbacks = [CacheManagerCallback]
+    if training_args.enable_early_stopping_callback:
+        callbacks.append(early_stopping_callback)
     if is_wandb_available():
-        callbacks = [CacheManagerCallback, early_stopping_callback, CustomWandbCallback]
-    else:
-        callbacks = [CacheManagerCallback, early_stopping_callback]
-
+        callbacks.append(CustomWandbCallback)
     if training_args.generation_max_length is None:
         training_args.generation_max_length = data_args.val_max_target_length
     if training_args.generation_num_beams is None:
