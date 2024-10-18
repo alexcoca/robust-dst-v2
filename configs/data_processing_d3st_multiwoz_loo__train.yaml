@@ -1,0 +1,43 @@
+# MultiWOZ leave-one-out cross validation train & dev data processing
+# Leaving "train" domain out
+metadata:
+  data_format: 'd3st_multiwoz_loo_train'
+preprocessing:
+  special_tokens:
+    - "[user]"
+    - "[system]"
+    - "[states]"
+    - "[intents]"
+    - "[req_slots]"
+  # delimiter to separate slot/intent IDs from their descriptions or values
+  delimiter: '='
+  # note that using | as value separator will cause parsing trouble
+  # sgd dataset contains slot-value "restaurant_name": ["Ginza | Japanese Sushi Restaurant"]
+  value_separator: " || "
+  # multiWOZ dataset version: ("2.1", "2.2", "2.3", "2.4")
+  multiwoz_version: '2.4'
+  # what to use for the slot descriptions
+  # full_desc: A natural language description of the slot
+  # full_desc_with_domain: Domain, followed by natural language description of the slot
+  # item_name: The name of the slot
+  # shuffled_item_name: Random permutation of the slot name
+  description_type: "full_desc_with_domain"
+  # whether to use multiple choice prompting for categorical slots
+  # none: Don't use multiple choice prompting
+  # a: Use the prompt "1: ... a) b) c).
+  # 1a: Use the prompt "1: ... 1a) 1b) 1c).
+  multiple_choice: "1a"
+  # if true, only include domains that are active in this dialogue
+  use_active_domains_only: true
+  # don't include these domains if set
+  # this is used to run zero-shot cross-domain experiments as in paper
+  # https://aclanthology.org/2021.naacl-main.448.pdf
+  blocked_domains: ['train', "police", "hospital"]
+  # if true, separate target slot-value pairs using ;.
+  use_target_separators: false
+reproduce:
+  seed: 20230101 # same seed for random, NumPy, PyTorch (CPU/GPU), across devices
+  cudnn:
+    enabled: True
+    deterministic: False
+    benchmark: True

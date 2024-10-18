@@ -1,0 +1,2156 @@
+[
+    {
+        "service_name": "Alarm_15",
+        "description": "manage alarms by getting and setting them easily",
+        "slots": [
+            {
+                "name": "alarm_time",
+                "description": "exists an alarm",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "alarm_name",
+                "description": "alarm named",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "new_alarm_time",
+                "description": "What time would you like added",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "new_alarm_name",
+                "description": "make the title",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "GetAlarms",
+                "description": "What alarms do I have active at the moment",
+                "is_transactional": false,
+                "required_slots": [],
+                "optional_slots": {},
+                "result_slots": [
+                    "alarm_time",
+                    "alarm_name"
+                ]
+            },
+            {
+                "name": "AddAlarm",
+                "description": "I would like to create an alarm notification",
+                "is_transactional": true,
+                "required_slots": [
+                    "new_alarm_time"
+                ],
+                "optional_slots": {
+                    "new_alarm_name": "New alarm"
+                },
+                "result_slots": [
+                    "new_alarm_time",
+                    "new_alarm_name"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Buses_35",
+        "description": "Affordable and comfortable bus travel across the country",
+        "slots": [
+            {
+                "name": "from_city",
+                "description": "What is your place of departure",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "to_city",
+                "description": "Where should it be headed to",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "from_station",
+                "description": "Where is it departing from",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "to_station",
+                "description": "Where exactly does it arrive",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "departure_date",
+                "description": "What is the day of the trip",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "departure_time",
+                "description": "what time do you want to leave",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "price",
+                "description": "What does a seat cost",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "additional_luggage",
+                "description": "extra luggage",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            },
+            {
+                "name": "num_passengers",
+                "description": "How many of you are there",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                ]
+            },
+            {
+                "name": "category",
+                "description": "Can i know the number of bus stops",
+                "is_categorical": true,
+                "possible_values": [
+                    "direct",
+                    "one-stop"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "FindBus",
+                "description": "Let's check out bus schedules going there please",
+                "is_transactional": false,
+                "required_slots": [
+                    "from_city",
+                    "to_city",
+                    "departure_date"
+                ],
+                "optional_slots": {
+                    "num_passengers": "1",
+                    "category": "direct"
+                },
+                "result_slots": [
+                    "from_city",
+                    "to_city",
+                    "from_station",
+                    "to_station",
+                    "departure_date",
+                    "departure_time",
+                    "price",
+                    "num_passengers",
+                    "category"
+                ]
+            },
+            {
+                "name": "BuyBusTicket",
+                "description": "I need to buy travel tickets",
+                "is_transactional": true,
+                "required_slots": [
+                    "from_city",
+                    "to_city",
+                    "departure_date",
+                    "departure_time",
+                    "num_passengers"
+                ],
+                "optional_slots": {
+                    "additional_luggage": "False"
+                },
+                "result_slots": [
+                    "from_city",
+                    "to_city",
+                    "from_station",
+                    "to_station",
+                    "departure_date",
+                    "departure_time",
+                    "price",
+                    "additional_luggage",
+                    "num_passengers",
+                    "category"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Events_35",
+        "description": "Find and book tickets to any cultural events in your area",
+        "slots": [
+            {
+                "name": "event_type",
+                "description": "What kind of things do you enjoy",
+                "is_categorical": true,
+                "possible_values": [
+                    "Music",
+                    "Theater"
+                ]
+            },
+            {
+                "name": "event_name",
+                "description": "What event do you wish to see",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "date",
+                "description": "Is there a particular day you would like the tickets for",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "time",
+                "description": "When does the show start",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "number_of_tickets",
+                "description": "How many seats will your party need",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9"
+                ]
+            },
+            {
+                "name": "price_per_ticket",
+                "description": "How much is entry",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "city",
+                "description": "Have you fixed any location",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "venue",
+                "description": "What is the name of the venue",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "venue_address",
+                "description": "Where is the venue",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "FindEvents",
+                "description": "I need help to amuse myself",
+                "is_transactional": false,
+                "required_slots": [
+                    "event_type",
+                    "city"
+                ],
+                "optional_slots": {
+                    "date": "dontcare"
+                },
+                "result_slots": [
+                    "event_type",
+                    "event_name",
+                    "date",
+                    "time",
+                    "price_per_ticket",
+                    "city",
+                    "venue",
+                    "venue_address"
+                ]
+            },
+            {
+                "name": "BuyEventTickets",
+                "description": "I want to make an event reservation there",
+                "is_transactional": true,
+                "required_slots": [
+                    "event_name",
+                    "number_of_tickets",
+                    "date",
+                    "city"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "event_name",
+                    "date",
+                    "time",
+                    "number_of_tickets",
+                    "price_per_ticket",
+                    "city",
+                    "venue",
+                    "venue_address"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Flights_45",
+        "description": "Find cheap flights in seconds and book flights",
+        "slots": [
+            {
+                "name": "number_of_tickets",
+                "description": "How many people did you search for",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ]
+            },
+            {
+                "name": "seating_class",
+                "description": "Is this economy or business class",
+                "is_categorical": true,
+                "possible_values": [
+                    "Economy",
+                    "Premium Economy",
+                    "Business"
+                ]
+            },
+            {
+                "name": "origin_airport",
+                "description": "Which city would you like to fly out of",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "destination_airport",
+                "description": "Where will you be headed",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "departure_date",
+                "description": "When are you flying out",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "return_date",
+                "description": "Which day are you coming back",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "is_nonstop",
+                "description": "has no layover",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            },
+            {
+                "name": "outbound_departure_time",
+                "description": "onward flight takes off at",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "outbound_arrival_time",
+                "description": "When would I get where I am going",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "inbound_arrival_time",
+                "description": "When is it scheduled to arrive back home",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "inbound_departure_time",
+                "description": "returning at",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "price",
+                "description": "price to pay",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "airlines",
+                "description": "Who do you want to fly with",
+                "is_categorical": true,
+                "possible_values": [
+                    "United Airlines",
+                    "American Airlines",
+                    "Delta Airlines",
+                    "Southwest Airlines",
+                    "Alaska Airlines",
+                    "British Airways",
+                    "Air Canada",
+                    "Air France",
+                    "South African Airways",
+                    "LOT Polish Airlines",
+                    "LATAM Brasil"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "SearchOnewayFlight",
+                "description": "I want a one-way plane ride to get there",
+                "is_transactional": false,
+                "required_slots": [
+                    "origin_airport",
+                    "destination_airport",
+                    "departure_date"
+                ],
+                "optional_slots": {
+                    "seating_class": "Economy",
+                    "number_of_tickets": "1",
+                    "airlines": "dontcare"
+                },
+                "result_slots": [
+                    "number_of_tickets",
+                    "seating_class",
+                    "origin_airport",
+                    "destination_airport",
+                    "departure_date",
+                    "is_nonstop",
+                    "outbound_departure_time",
+                    "outbound_arrival_time",
+                    "price",
+                    "airlines"
+                ]
+            },
+            {
+                "name": "SearchRoundtripFlights",
+                "description": "I'm looking for round trip plane tickets",
+                "is_transactional": false,
+                "required_slots": [
+                    "origin_airport",
+                    "destination_airport",
+                    "departure_date",
+                    "return_date"
+                ],
+                "optional_slots": {
+                    "seating_class": "Economy",
+                    "number_of_tickets": "1",
+                    "airlines": "dontcare"
+                },
+                "result_slots": [
+                    "number_of_tickets",
+                    "seating_class",
+                    "origin_airport",
+                    "destination_airport",
+                    "departure_date",
+                    "return_date",
+                    "is_nonstop",
+                    "outbound_departure_time",
+                    "outbound_arrival_time",
+                    "inbound_arrival_time",
+                    "inbound_departure_time",
+                    "price",
+                    "airlines"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Homes_25",
+        "description": "Service for finding properties to buy and rent",
+        "slots": [
+            {
+                "name": "intent",
+                "description": "would you prefer a place for sale or for rent",
+                "is_categorical": true,
+                "possible_values": [
+                    "rent",
+                    "buy"
+                ]
+            },
+            {
+                "name": "area",
+                "description": "What area will you be moving to",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "address",
+                "description": "Where will I be staying",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "property_name",
+                "description": "Let me know the details of property that you want to visit",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "phone_number",
+                "description": "How may I phone them",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "has_garage",
+                "description": "Is there a separate unit designed for parking the car",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            },
+            {
+                "name": "in_unit_laundry",
+                "description": "Is there a washer or dryer inside",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            },
+            {
+                "name": "price",
+                "description": "costing",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "visit_date",
+                "description": "When shall I schedule it",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "number_of_beds",
+                "description": "Tell me the number of bed rooms you need",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ]
+            },
+            {
+                "name": "number_of_baths",
+                "description": "How many baths",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "FindHomeByArea",
+                "description": "Help me find a home",
+                "is_transactional": false,
+                "required_slots": [
+                    "area",
+                    "intent",
+                    "number_of_beds",
+                    "number_of_baths"
+                ],
+                "optional_slots": {
+                    "has_garage": "dontcare",
+                    "in_unit_laundry": "dontcare"
+                },
+                "result_slots": [
+                    "intent",
+                    "area",
+                    "address",
+                    "property_name",
+                    "phone_number",
+                    "has_garage",
+                    "in_unit_laundry",
+                    "price",
+                    "number_of_beds",
+                    "number_of_baths"
+                ]
+            },
+            {
+                "name": "ScheduleVisit",
+                "description": "can you help me schedule a walk through",
+                "is_transactional": true,
+                "required_slots": [
+                    "property_name",
+                    "visit_date"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "address",
+                    "property_name",
+                    "phone_number",
+                    "has_garage",
+                    "in_unit_laundry",
+                    "price",
+                    "visit_date",
+                    "number_of_beds",
+                    "number_of_baths"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Hotels_25",
+        "description": "A popular service for searching and booking houses for short term stay",
+        "slots": [
+            {
+                "name": "where_to",
+                "description": "Where will you be staying",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "number_of_adults",
+                "description": "How big is your group",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                ]
+            },
+            {
+                "name": "check_in_date",
+                "description": "Checking in when",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "check_out_date",
+                "description": "Until when",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "rating",
+                "description": "What is their star rating",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "address",
+                "description": "Where will I be staying",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "phone_number",
+                "description": "Please give me the contact",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "total_price",
+                "description": "How much will I pay for it",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "has_laundry_service",
+                "description": "Is laundry available there",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "BookHouse",
+                "description": "I need to rent a house for an upcoming trip",
+                "is_transactional": true,
+                "required_slots": [
+                    "where_to",
+                    "number_of_adults",
+                    "check_in_date",
+                    "check_out_date"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "where_to",
+                    "number_of_adults",
+                    "check_in_date",
+                    "check_out_date",
+                    "rating",
+                    "address",
+                    "phone_number",
+                    "total_price",
+                    "has_laundry_service"
+                ]
+            },
+            {
+                "name": "SearchHouse",
+                "description": "Could you also help me search for a house to stay in that area",
+                "is_transactional": false,
+                "required_slots": [
+                    "where_to"
+                ],
+                "optional_slots": {
+                    "has_laundry_service": "dontcare",
+                    "number_of_adults": "dontcare",
+                    "rating": "dontcare"
+                },
+                "result_slots": [
+                    "where_to",
+                    "number_of_adults",
+                    "rating",
+                    "address",
+                    "phone_number",
+                    "total_price",
+                    "has_laundry_service"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Hotels_45",
+        "description": "Accommodation searching and booking portal",
+        "slots": [
+            {
+                "name": "location",
+                "description": "Where will you be when you check in",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "number_of_rooms",
+                "description": "check into",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3"
+                ]
+            },
+            {
+                "name": "check_in_date",
+                "description": "Can you also please tell me when you are going to go at the hotel",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "stay_length",
+                "description": "How long will you be here",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "star_rating",
+                "description": "How are they rated",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                ]
+            },
+            {
+                "name": "place_name",
+                "description": "place called",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "street_address",
+                "description": "Can you give me the exact location of the hotel",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "phone_number",
+                "description": "what's the number to call in case I need to reach them",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "price_per_night",
+                "description": "How much is the nightly rate",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "smoking_allowed",
+                "description": "Is it smoker-friendly",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "ReserveHotel",
+                "description": "I think I will book the hotel you mentioned",
+                "is_transactional": true,
+                "required_slots": [
+                    "place_name",
+                    "check_in_date",
+                    "stay_length",
+                    "location"
+                ],
+                "optional_slots": {
+                    "number_of_rooms": "1"
+                },
+                "result_slots": [
+                    "location",
+                    "number_of_rooms",
+                    "check_in_date",
+                    "stay_length",
+                    "star_rating",
+                    "place_name",
+                    "street_address",
+                    "phone_number",
+                    "price_per_night",
+                    "smoking_allowed"
+                ]
+            },
+            {
+                "name": "SearchHotel",
+                "description": "I want to find a hotel to stay at please",
+                "is_transactional": false,
+                "required_slots": [
+                    "location"
+                ],
+                "optional_slots": {
+                    "star_rating": "dontcare",
+                    "smoking_allowed": "dontcare",
+                    "number_of_rooms": "dontcare"
+                },
+                "result_slots": [
+                    "location",
+                    "number_of_rooms",
+                    "star_rating",
+                    "place_name",
+                    "street_address",
+                    "phone_number",
+                    "price_per_night",
+                    "smoking_allowed"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Media_35",
+        "description": "Enjoy instant and unlimited access to best shows, movies, comedy, sports, documentaries and more.",
+        "slots": [
+            {
+                "name": "title",
+                "description": "What would you like to stream",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "genre",
+                "description": "What kind of film do you prefer",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "subtitle_language",
+                "description": "subtitles turned on",
+                "is_categorical": true,
+                "possible_values": [
+                    "English",
+                    "Spanish",
+                    "Hindi",
+                    "French"
+                ]
+            },
+            {
+                "name": "starring",
+                "description": "Who plays the lead role",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "FindMovies",
+                "description": "Find me an interesting feature I can watch on the internet please",
+                "is_transactional": false,
+                "required_slots": [
+                    "genre"
+                ],
+                "optional_slots": {
+                    "starring": "dontcare"
+                },
+                "result_slots": [
+                    "title",
+                    "genre",
+                    "subtitle_language",
+                    "starring"
+                ]
+            },
+            {
+                "name": "PlayMovie",
+                "description": "I'd like you to play the film now",
+                "is_transactional": true,
+                "required_slots": [
+                    "title"
+                ],
+                "optional_slots": {
+                    "subtitle_language": "English"
+                },
+                "result_slots": [
+                    "title",
+                    "genre",
+                    "subtitle_language",
+                    "starring"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Messaging_15",
+        "description": "Connect and share locations with your contacts",
+        "slots": [
+            {
+                "name": "location",
+                "description": "address to send",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "contact_name",
+                "description": "Who is the sharing recipient",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "ShareLocation",
+                "description": "Wait, I'd like to share the address",
+                "is_transactional": true,
+                "required_slots": [
+                    "location",
+                    "contact_name"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "location",
+                    "contact_name"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Movies_15",
+        "description": "A go-to provider for finding movies, searching for show times and booking tickets",
+        "slots": [
+            {
+                "name": "price",
+                "description": "What will this set me back",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "number_of_tickets",
+                "description": "How many people are going",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9"
+                ]
+            },
+            {
+                "name": "show_type",
+                "description": "movie on",
+                "is_categorical": true,
+                "possible_values": [
+                    "regular",
+                    "3d",
+                    "imax"
+                ]
+            },
+            {
+                "name": "theater_name",
+                "description": "playing at",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "show_time",
+                "description": "it is at",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "show_date",
+                "description": "What day",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "genre",
+                "description": "What sort of film is it",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "street_address",
+                "description": "And what is the exact location for the cinema",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "location",
+                "description": "Where do you live",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "movie_name",
+                "description": "What film do you want to see",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "BuyMovieTickets",
+                "description": "I want to book the tickets",
+                "is_transactional": true,
+                "required_slots": [
+                    "movie_name",
+                    "number_of_tickets",
+                    "show_date",
+                    "location",
+                    "show_time",
+                    "show_type"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "price",
+                    "number_of_tickets",
+                    "show_type",
+                    "theater_name",
+                    "show_time",
+                    "show_date",
+                    "genre",
+                    "street_address",
+                    "location",
+                    "movie_name"
+                ]
+            },
+            {
+                "name": "FindMovies",
+                "description": "I'd also like to find a movie showing in the area",
+                "is_transactional": false,
+                "required_slots": [
+                    "location"
+                ],
+                "optional_slots": {
+                    "theater_name": "dontcare",
+                    "genre": "dontcare",
+                    "show_type": "dontcare"
+                },
+                "result_slots": [
+                    "price",
+                    "show_type",
+                    "theater_name",
+                    "genre",
+                    "street_address",
+                    "location",
+                    "movie_name"
+                ]
+            },
+            {
+                "name": "GetTimesForMovie",
+                "description": "What are the showtimes",
+                "is_transactional": false,
+                "required_slots": [
+                    "movie_name",
+                    "location",
+                    "show_date"
+                ],
+                "optional_slots": {
+                    "theater_name": "dontcare",
+                    "show_type": "dontcare"
+                },
+                "result_slots": [
+                    "price",
+                    "show_type",
+                    "theater_name",
+                    "show_time",
+                    "show_date",
+                    "genre",
+                    "street_address",
+                    "location",
+                    "movie_name"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Movies_35",
+        "description": "A review-aggregation website for movies and television",
+        "slots": [
+            {
+                "name": "movie_title",
+                "description": "What film do you want to see",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "genre",
+                "description": "The movie that you found, what genre is it classified as",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "percent_rating",
+                "description": "rated",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "cast",
+                "description": "Who starred in it",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "directed_by",
+                "description": "Can you tell me who directed it",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "FindMovies",
+                "description": "I wanna watch a film",
+                "is_transactional": false,
+                "required_slots": [],
+                "optional_slots": {
+                    "directed_by": "dontcare",
+                    "genre": "dontcare",
+                    "cast": "dontcare"
+                },
+                "result_slots": [
+                    "movie_title",
+                    "genre",
+                    "percent_rating",
+                    "cast",
+                    "directed_by"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Music_35",
+        "description": "A free, personalized platform that plays music you'll love. Discover new music and enjoy old favorites.",
+        "slots": [
+            {
+                "name": "track",
+                "description": "song called",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "artist",
+                "description": "track by",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "album",
+                "description": "is available on album",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "genre",
+                "description": "For this song, in which genre would it be classified as",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "year",
+                "description": "Which year did that album come out",
+                "is_categorical": true,
+                "possible_values": [
+                    "2010",
+                    "2011",
+                    "2012",
+                    "2013",
+                    "2014",
+                    "2015",
+                    "2016",
+                    "2017",
+                    "2018",
+                    "2019"
+                ]
+            },
+            {
+                "name": "device",
+                "description": "run it on",
+                "is_categorical": true,
+                "possible_values": [
+                    "Living room",
+                    "Kitchen",
+                    "Patio"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "PlayMedia",
+                "description": "I'd like to hear the song now",
+                "is_transactional": true,
+                "required_slots": [
+                    "track"
+                ],
+                "optional_slots": {
+                    "artist": "dontcare",
+                    "device": "Living room",
+                    "album": "dontcare"
+                },
+                "result_slots": [
+                    "track",
+                    "artist",
+                    "album",
+                    "genre",
+                    "year",
+                    "device"
+                ]
+            },
+            {
+                "name": "LookupMusic",
+                "description": "I fancy listening to some music",
+                "is_transactional": false,
+                "required_slots": [],
+                "optional_slots": {
+                    "artist": "dontcare",
+                    "album": "dontcare",
+                    "genre": "dontcare",
+                    "year": "dontcare"
+                },
+                "result_slots": [
+                    "track",
+                    "artist",
+                    "album",
+                    "genre",
+                    "year"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Payment_15",
+        "description": "The fast, simple way to pay in apps, on the web, and in millions of stores",
+        "slots": [
+            {
+                "name": "payment_method",
+                "description": "From what account would you like it transferred from",
+                "is_categorical": true,
+                "possible_values": [
+                    "app balance",
+                    "debit card",
+                    "credit card"
+                ]
+            },
+            {
+                "name": "amount",
+                "description": "How much are you paying",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "receiver",
+                "description": "And the name of the other party",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "private_visibility",
+                "description": "transfer the money privately",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "RequestPayment",
+                "description": "I need to collect money from someone who purchase a basket from my online store",
+                "is_transactional": true,
+                "required_slots": [
+                    "receiver",
+                    "amount"
+                ],
+                "optional_slots": {
+                    "private_visibility": "False"
+                },
+                "result_slots": [
+                    "amount",
+                    "receiver",
+                    "private_visibility"
+                ]
+            },
+            {
+                "name": "MakePayment",
+                "description": "I want to make a payment",
+                "is_transactional": true,
+                "required_slots": [
+                    "payment_method",
+                    "amount",
+                    "receiver"
+                ],
+                "optional_slots": {
+                    "private_visibility": "False"
+                },
+                "result_slots": [
+                    "payment_method",
+                    "amount",
+                    "receiver",
+                    "private_visibility"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "RentalCars_35",
+        "description": "A leading global provider of car rental solutions",
+        "slots": [
+            {
+                "name": "car_type",
+                "description": "What kind of car were you looking for",
+                "is_categorical": true,
+                "possible_values": [
+                    "Hatchback",
+                    "Sedan",
+                    "SUV"
+                ]
+            },
+            {
+                "name": "car_name",
+                "description": "Which brand of vehicle would you like",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "pickup_location",
+                "description": "What location would you like to pick up the vehicle",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "start_date",
+                "description": "What day would you like to pick up the vehicle",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "pickup_time",
+                "description": "At what hour do you prefer to pick up the vehicle",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "city",
+                "description": "Where are you going to need it",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "end_date",
+                "description": "Till what day you need the car",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "price_per_day",
+                "description": "what's the daily rate for that",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "add_insurance",
+                "description": "Would you like to add insurance to the rental",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "GetCarsAvailable",
+                "description": "Find me a rental",
+                "is_transactional": false,
+                "required_slots": [
+                    "city",
+                    "start_date",
+                    "pickup_time",
+                    "end_date"
+                ],
+                "optional_slots": {
+                    "car_type": "dontcare"
+                },
+                "result_slots": [
+                    "car_type",
+                    "car_name",
+                    "pickup_location",
+                    "start_date",
+                    "pickup_time",
+                    "city",
+                    "end_date",
+                    "price_per_day"
+                ]
+            },
+            {
+                "name": "ReserveCar",
+                "description": "I want to book this car for rent",
+                "is_transactional": true,
+                "required_slots": [
+                    "pickup_location",
+                    "start_date",
+                    "pickup_time",
+                    "end_date",
+                    "car_type",
+                    "add_insurance"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "car_type",
+                    "car_name",
+                    "pickup_location",
+                    "start_date",
+                    "pickup_time",
+                    "end_date",
+                    "price_per_day",
+                    "add_insurance"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Restaurants_25",
+        "description": "A popular restaurant search and reservation service",
+        "slots": [
+            {
+                "name": "restaurant_name",
+                "description": "What restaurant do you want to reserve a table at",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "date",
+                "description": "meal on",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "time",
+                "description": "When should I book for",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "has_seating_outdoors",
+                "description": "Do they have tables outside",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            },
+            {
+                "name": "has_vegetarian_options",
+                "description": "Do they offer vegetarian meals",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            },
+            {
+                "name": "phone_number",
+                "description": "How can I get in touch with them",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "rating",
+                "description": "What are the customer reviews",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "address",
+                "description": "Where is this place located",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "number_of_seats",
+                "description": "a booking for",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6"
+                ]
+            },
+            {
+                "name": "price_range",
+                "description": "Is it expensive",
+                "is_categorical": true,
+                "possible_values": [
+                    "cheap",
+                    "moderate",
+                    "pricey",
+                    "ultra high-end"
+                ]
+            },
+            {
+                "name": "location",
+                "description": "In which location would you like to dine",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "category",
+                "description": "Did you have a particular cuisine, such as Chinese, American or anything else in mind",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "ReserveRestaurant",
+                "description": "Book me a table there",
+                "is_transactional": true,
+                "required_slots": [
+                    "restaurant_name",
+                    "location",
+                    "time"
+                ],
+                "optional_slots": {
+                    "number_of_seats": "2",
+                    "date": "2019-03-01"
+                },
+                "result_slots": [
+                    "restaurant_name",
+                    "date",
+                    "time",
+                    "has_seating_outdoors",
+                    "has_vegetarian_options",
+                    "phone_number",
+                    "rating",
+                    "address",
+                    "number_of_seats",
+                    "price_range",
+                    "location",
+                    "category"
+                ]
+            },
+            {
+                "name": "FindRestaurants",
+                "description": "I need help searching for a place to eat",
+                "is_transactional": false,
+                "required_slots": [
+                    "category",
+                    "location"
+                ],
+                "optional_slots": {
+                    "price_range": "dontcare",
+                    "has_vegetarian_options": "dontcare",
+                    "has_seating_outdoors": "dontcare"
+                },
+                "result_slots": [
+                    "restaurant_name",
+                    "has_seating_outdoors",
+                    "has_vegetarian_options",
+                    "phone_number",
+                    "rating",
+                    "address",
+                    "price_range",
+                    "location",
+                    "category"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "RideSharing_25",
+        "description": "App to book a cab to any destination",
+        "slots": [
+            {
+                "name": "destination",
+                "description": "Where to",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "ride_type",
+                "description": "Do you have vehicle preferences",
+                "is_categorical": true,
+                "possible_values": [
+                    "Pool",
+                    "Regular",
+                    "Luxury"
+                ]
+            },
+            {
+                "name": "ride_fare",
+                "description": "How much will the trip cost",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "wait_time",
+                "description": "how long until it gets here",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "number_of_seats",
+                "description": "How many are in your group",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "GetRide",
+                "description": "Can you order me a taxi",
+                "is_transactional": true,
+                "required_slots": [
+                    "destination",
+                    "number_of_seats",
+                    "ride_type"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "destination",
+                    "ride_type",
+                    "ride_fare",
+                    "wait_time",
+                    "number_of_seats"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Services_15",
+        "description": "A widely used service for finding and reserving the hair stylist of your choice",
+        "slots": [
+            {
+                "name": "stylist_name",
+                "description": "Which salon would you like the appointment at",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "phone_number",
+                "description": "How may I reach them",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "average_rating",
+                "description": "How are they rated",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "is_unisex",
+                "description": "Do they cut male and female hair",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            },
+            {
+                "name": "street_address",
+                "description": "On what street is it located",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "city",
+                "description": "Where are you trying to get your hair done",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "appointment_date",
+                "description": "What day do you wish to go",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "appointment_time",
+                "description": "At what time do you want to visit this salon",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "BookAppointment",
+                "description": "I need to schedule a visit to the salon",
+                "is_transactional": true,
+                "required_slots": [
+                    "stylist_name",
+                    "appointment_time",
+                    "appointment_date"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "stylist_name",
+                    "phone_number",
+                    "average_rating",
+                    "is_unisex",
+                    "street_address",
+                    "appointment_date",
+                    "appointment_time"
+                ]
+            },
+            {
+                "name": "FindProvider",
+                "description": "Look up salons",
+                "is_transactional": false,
+                "required_slots": [
+                    "city"
+                ],
+                "optional_slots": {
+                    "is_unisex": "dontcare"
+                },
+                "result_slots": [
+                    "stylist_name",
+                    "phone_number",
+                    "average_rating",
+                    "is_unisex",
+                    "street_address",
+                    "city"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Services_45",
+        "description": "Discover the right therapist for you and make reservations easily",
+        "slots": [
+            {
+                "name": "therapist_name",
+                "description": "booked with",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "phone_number",
+                "description": "Please provide me with their phone number",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "address",
+                "description": "what street are they on",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "city",
+                "description": "Where should they be located",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "appointment_date",
+                "description": "On which day should i book",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "appointment_time",
+                "description": "When would you prefer your reservation to be at",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "type",
+                "description": "Should they specialize in something",
+                "is_categorical": true,
+                "possible_values": [
+                    "Psychologist",
+                    "Family Counselor",
+                    "Psychiatrist"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "BookAppointment",
+                "description": "Would you book an appointment",
+                "is_transactional": true,
+                "required_slots": [
+                    "therapist_name",
+                    "appointment_time",
+                    "appointment_date"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "therapist_name",
+                    "phone_number",
+                    "address",
+                    "appointment_date",
+                    "appointment_time"
+                ]
+            },
+            {
+                "name": "FindProvider",
+                "description": "I'm looking to go to therapy, please find me a therapist",
+                "is_transactional": false,
+                "required_slots": [
+                    "city",
+                    "type"
+                ],
+                "optional_slots": {},
+                "result_slots": [
+                    "therapist_name",
+                    "phone_number",
+                    "address",
+                    "city",
+                    "type"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Trains_15",
+        "description": "Service to find and reserve train journeys between cities",
+        "slots": [
+            {
+                "name": "from",
+                "description": "From which do you want to go",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "to",
+                "description": "To which place you are going",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "from_station",
+                "description": "What is the departure station called",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "to_station",
+                "description": "and what is the arrival station",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "date_of_journey",
+                "description": "When will you be departing on your trip",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "journey_start_time",
+                "description": "leaves at",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "total",
+                "description": "costs",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "number_of_adults",
+                "description": "how many seat do you need",
+                "is_categorical": true,
+                "possible_values": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                ]
+            },
+            {
+                "name": "class",
+                "description": "What is the type of class",
+                "is_categorical": true,
+                "possible_values": [
+                    "Value",
+                    "Flexible",
+                    "Business"
+                ]
+            },
+            {
+                "name": "trip_protection",
+                "description": "Do you want travel insurance",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "GetTrainTickets",
+                "description": "I want you to buy the ticket you just found",
+                "is_transactional": true,
+                "required_slots": [
+                    "from",
+                    "to",
+                    "date_of_journey",
+                    "journey_start_time",
+                    "number_of_adults",
+                    "trip_protection"
+                ],
+                "optional_slots": {
+                    "class": "Value"
+                },
+                "result_slots": [
+                    "from",
+                    "to",
+                    "from_station",
+                    "to_station",
+                    "date_of_journey",
+                    "journey_start_time",
+                    "total",
+                    "number_of_adults",
+                    "class",
+                    "trip_protection"
+                ]
+            },
+            {
+                "name": "FindTrains",
+                "description": "I need help looking for a train",
+                "is_transactional": false,
+                "required_slots": [
+                    "from",
+                    "to",
+                    "date_of_journey"
+                ],
+                "optional_slots": {
+                    "class": "Value",
+                    "number_of_adults": "1"
+                },
+                "result_slots": [
+                    "from",
+                    "to",
+                    "from_station",
+                    "to_station",
+                    "date_of_journey",
+                    "journey_start_time",
+                    "total",
+                    "number_of_adults",
+                    "class",
+                    "trip_protection"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Travel_15",
+        "description": "The biggest database of tourist attractions and points of interest",
+        "slots": [
+            {
+                "name": "location",
+                "description": "In what area, exactly",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "attraction_name",
+                "description": "attraction that's popular",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "category",
+                "description": "What is that exactly",
+                "is_categorical": true,
+                "possible_values": [
+                    "Place of Worship",
+                    "Theme Park",
+                    "Museum",
+                    "Historical Landmark",
+                    "Park",
+                    "Tourist Attraction",
+                    "Sports Venue",
+                    "Shopping Area",
+                    "Performing Arts Venue",
+                    "Nature Preserve"
+                ]
+            },
+            {
+                "name": "phone_number",
+                "description": "What's their telephone",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "free_entry",
+                "description": "Is there a charge",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            },
+            {
+                "name": "good_for_kids",
+                "description": "Is this place child-friendly",
+                "is_categorical": true,
+                "possible_values": [
+                    "True",
+                    "False"
+                ]
+            }
+        ],
+        "intents": [
+            {
+                "name": "FindAttractions",
+                "description": "Any tourist traps that you recommend",
+                "is_transactional": false,
+                "required_slots": [
+                    "location"
+                ],
+                "optional_slots": {
+                    "free_entry": "dontcare",
+                    "category": "dontcare",
+                    "good_for_kids": "dontcare"
+                },
+                "result_slots": [
+                    "location",
+                    "attraction_name",
+                    "category",
+                    "phone_number",
+                    "free_entry",
+                    "good_for_kids"
+                ]
+            }
+        ]
+    },
+    {
+        "service_name": "Weather_15",
+        "description": "Check the weather for any place and any date",
+        "slots": [
+            {
+                "name": "precipitation",
+                "description": "chance of precipitation",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "humidity",
+                "description": "Will it be a very wet day",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "wind",
+                "description": "How about the windiness",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "temperature",
+                "description": "the temp is",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "city",
+                "description": "In which location should I check the weather forecast",
+                "is_categorical": false,
+                "possible_values": []
+            },
+            {
+                "name": "date",
+                "description": "For what day",
+                "is_categorical": false,
+                "possible_values": []
+            }
+        ],
+        "intents": [
+            {
+                "name": "GetWeather",
+                "description": "Whats it like outside",
+                "is_transactional": false,
+                "required_slots": [
+                    "city"
+                ],
+                "optional_slots": {
+                    "date": "2019-03-01"
+                },
+                "result_slots": [
+                    "precipitation",
+                    "humidity",
+                    "wind",
+                    "temperature",
+                    "city",
+                    "date"
+                ]
+            }
+        ]
+    }
+]

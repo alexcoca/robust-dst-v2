@@ -1,0 +1,13 @@
+name: robust-dst
+channels:
+#  - defaults
+  - conda-forge
+  - pytorch
+  - huggingface
+  # - fastai
+dependencies:
+  - python>=3.9, <3.10
+  - pip
+  - pip:
+    - matplotlib
+    - -e .  # install git checkout of robust-dst in editable mode

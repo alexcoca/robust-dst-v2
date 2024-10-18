@@ -1,0 +1,47 @@
+metadata:
+  data_format: 'd3st_sgd'
+preprocessing:
+  special_tokens:
+    - "[user]"
+    - "[system]"
+    - "[states]"
+    - "[intents]"
+    - "[req_slots]"
+  # delimiter to separate slot/intent IDs from their descriptions or values
+  delimiter: '='
+  # note that using | as value separator will cause parsing trouble
+  # sgd dataset contains slot-value "restaurant_name": ["Ginza | Japanese Sushi Restaurant"]
+  value_separator: " || "
+  # whether to cumulate slot-values across the turns in the same dialogue
+  cumulate_slots: False
+  # whether to treat categorical slots with all numeric possible values as noncategorical
+  all_numeric_noncat: True
+  # which level of information should be generated
+  # dst: only states, only user turns
+  # dst_intent: states and intents, only user turns
+  # dst_intent_act: states + intents + act, only system turns
+  level: 'dst_intent'
+  # format of the schemaless data
+  # full_desc: Use full language description as the item description
+  # item_name: Use item name as the item description
+  # rand_name: Use random string as the item description
+  data_format: 'full_desc'
+  # if True, lowercase everything
+  lowercase: True
+  # if True, randomize the order of schema items
+  randomize_items: True
+  # whether to use multiple choice prompting for categorical slots
+  # none: Don't use multiple choice prompting
+  # a: Use the prompt "1: ... a) b) c).
+  # 1a: Use the prompt "1: ... 1a) 1b) 1c).
+  multiple_choice: "1a"
+  # if not 0, the percentage of data to be generated
+  data_percent: 0.0
+  # when data_percent > 0 make sure domains are (close-to) uniform distribution.
+  uniform_domain_distribution: False
+reproduce:
+  seed: 20230101 # same seed for random, NumPy, PyTorch (CPU/GPU), across devices
+  cudnn:
+    enabled: True
+    deterministic: False
+    benchmark: True

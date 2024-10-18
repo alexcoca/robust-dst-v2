@@ -1,0 +1,16 @@
+name: robust-dst
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+  # - fastai
+dependencies:
+  - pytest>=7.2.0, <8.0.0
+  - pytest-cov
+  - tox
+  - pre_commit
+  - nbdime
+#  - nbstripout
+  - sphinx
+  - recommonmark
+  - flake8>=5.0.0, <6.0.0

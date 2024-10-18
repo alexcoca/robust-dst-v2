@@ -1,0 +1,9 @@
+metadata: {}
+reproduce:
+  seed: 1234 # same seed for random, NumPy, PyTorch (CPU/GPU), across devices
+  cudnn:
+    enabled: True
+    deterministic: False
+    benchmark: True
+linearization_version: 'version_1'
+downsample_factor: 1
