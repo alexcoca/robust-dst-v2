@@ -27,7 +27,6 @@ from pathlib import Path
 import datasets
 import transformers
 from datasets import load_dataset
-from filelock import FileLock
 from mwzeval.metrics import Multiwoz24Evaluator
 from omegaconf import DictConfig, OmegaConf
 from torch.optim import Adam
@@ -43,7 +42,6 @@ from transformers import (
     is_wandb_available,
     set_seed,
 )
-from transformers.file_utils import is_offline_mode
 from transformers.trainer_callback import EarlyStoppingCallback
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
