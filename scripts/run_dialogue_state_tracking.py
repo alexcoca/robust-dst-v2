@@ -25,7 +25,6 @@ from itertools import chain
 from pathlib import Path
 
 import datasets
-import nltk  # Here to have a nice missing dependency error message early on
 import transformers
 from datasets import load_dataset
 from filelock import FileLock
@@ -81,18 +80,6 @@ require_version(
 )
 
 logger = logging.getLogger(__name__)
-
-try:
-    nltk.data.find("tokenizers/punkt")
-except (LookupError, OSError):
-    if is_offline_mode():
-        raise LookupError(
-            "Offline mode: run this script without TRANSFORMERS_OFFLINE first to"
-            " download nltk data files"
-        )
-    with FileLock(".lock") as lock:
-        nltk.download("punkt", quiet=True)
-
 
 def main():
     # See all possible arguments in src/transformers/training_args.py
