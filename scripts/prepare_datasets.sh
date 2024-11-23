@@ -54,11 +54,3 @@ do
   mkdir -p data/interim/blank_dialogue_templates/"$i"/test
   python -m scripts.blank -i data/raw/"$i"/test -o data/interim/blank_dialogue_templates/"$i"/test
 done
-
-# MultiWOZ
-wget --directory-prefix=$WORK_DIR https://raw.githubusercontent.com/smartyfh/MultiWOZ2.4/main/data/MULTIWOZ2.4.zip
-unzip $WORK_DIR/MULTIWOZ2.4.zip -d $WORK_DIR
-mkdir -p $DIR/data/raw/multiwoz
-mv $WORK_DIR/MULTIWOZ2.4/* $DIR/data/raw/multiwoz/
-wget --directory-prefix=$DIR/data/raw/multiwoz https://raw.githubusercontent.com/budzianowski/multiwoz/master/data/MultiWOZ_2.2/schema.json
-wget --directory-prefix=$DIR/data/raw/multiwoz https://raw.githubusercontent.com/budzianowski/multiwoz/master/data/MultiWOZ_2.2/dialog_acts.json
