@@ -9,9 +9,9 @@ from collections import defaultdict
 from typing import Optional
 
 from datasets import Dataset, load_dataset
-from robust_dst.methodflow import PipelineMixin
+from methodflow.pipeline import PipelineMixin
 from tqdm import tqdm
-from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
+from transformers import PreTrainedTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -27,21 +27,6 @@ class ValueType:
 class Speaker:
     USER = 1
     SYSTEM = 2
-
-
-import copy
-import logging
-from collections import defaultdict
-from typing import Any, Optional
-
-from datasets import Dataset
-from transformers import BatchEncoding, PreTrainedTokenizer, PreTrainedTokenizerFast
-
-from robust_dst.methodflow import PipelineMixin
-
-logger = logging.getLogger(__name__)
-
-Batch = Any
 
 
 class Preprocessor(PipelineMixin):
@@ -68,19 +53,18 @@ class Preprocessor(PipelineMixin):
         ignore_pad_token_for_loss: bool = True,
         num_proc: Optional[int] = None,
         load_from_cache_file: bool = True,
-        source_column: str = "prompt",
-        target_column: str = "completion",
+        source_column: str = "dialogues",
+        target_column: str = "state",
         input_prefix: str = "",
-        debug: bool = False,
     ) -> None:
         """Instantiate a preprocessor object.
 
         Args:
             tokenizer (PreTrainedTokenizer): The tokenizer to use
             max_source_length (int, optional): The maximum total input sequence length
-                after tokenization. Defaults to 2048.
+                after tokenization. Defaults to 1024.
             max_target_length (int, optional): The maximum total sequence length for
-                target text after tokenization. Defaults to 128.
+                target text after tokenization. Defaults to 64.
             padding (Union[bool, str], optional): Activates and controls padding.
                 Accepts the following values:
                     - True or 'longest'
@@ -102,12 +86,7 @@ class Preprocessor(PipelineMixin):
                 tokenization. Defaults to "".
         """
         self.tokenize = tokenize
-        if self.tokenize and not any(
-            (
-                isinstance(tokenizer, PreTrainedTokenizer),
-                isinstance(tokenizer, PreTrainedTokenizerFast),
-            )
-        ):
+        if self.tokenize and not isinstance(tokenizer, PreTrainedTokenizer):
             raise RuntimeError(
                 "A tokenizer must be specified if tokenization is desired"
             )
@@ -124,24 +103,47 @@ class Preprocessor(PipelineMixin):
         self.input_prefix = input_prefix
 
         self._dataset = None
-        self._discarded_examples = 0
-        self._debug = debug
 
-    def _tokenize_targets(
-        self, examples: Batch, truncation: bool, discard_truncated_examples: bool
-    ) -> Optional[BatchEncoding]:
-        """Tokenize the model targets."""
-        targets = self._read_column(self.target_column, examples)
-        if targets is None:
-            return
+    def _extract_and_tokenize(
+        self,
+        examples: Batch,
+        truncation: bool,
+        discard_truncated_examples: bool,
+    ) -> Batch:
+        """Tokenize the input and target columns.
+
+        Args:
+            examples (Batch): a batch of preprocessed dataset
+
+        Returns:
+            Tokenized dataset batch with columns: input_ids, attention_mask, labels
+        """
+        # remove pairs where at least one record is None
+        inputs, targets = [], []
+        for i in range(len(examples[self.source_column])):
+            if (
+                examples[self.source_column][i] is not None
+                and examples[self.target_column][i] is not None
+            ):
+                inputs.append(examples[self.source_column][i])
+                targets.append(examples[self.target_column][i])
+
+        inputs = [self.input_prefix + inp for inp in inputs]
+
+        model_inputs = self.tokenizer(
+            text=inputs,
+            max_length=self.max_source_length,
+            padding=self.padding,
+            truncation=truncation,
+            return_overflowing_tokens=truncation and discard_truncated_examples,
+        )
         labels = self.tokenizer(
             text_target=targets,
             max_length=self.max_target_length,
             padding=self.padding,
             truncation=True,
-            return_overflowing_tokens=True,
         )
-        assert self.get_overflow_sample_idx(labels) is None
+
         # If we are padding here, replace all tokenizer.pad_token_id in the labels
         # by -100 when we want to ignore padding in the loss.
         if self.padding == "max_length" and self.ignore_pad_token_for_loss:
@@ -152,48 +154,23 @@ class Preprocessor(PipelineMixin):
                 ]
                 for label in labels["input_ids"]
             ]
-        return labels
-
-    def _tokenize_inputs(
-        self, examples: Batch, truncation: bool, discard_truncated_examples: bool
-    ) -> BatchEncoding:
-        """Tokenize the model inputs."""
-        inputs = self._read_column(self.source_column, examples)
-        inputs = [self.input_prefix + inp for inp in inputs]
-        model_inputs = self.tokenizer(
-            text=inputs,
-            max_length=self.max_source_length,
-            padding=self.padding,
-            truncation=truncation,
-            return_overflowing_tokens=truncation and discard_truncated_examples,
-        )
-        return model_inputs
-
-    def _maybe_discard_truncated_examples(
-        self,
-        discard_truncated_examples: bool,
-        model_inputs: BatchEncoding,
-        labels: Optional[BatchEncoding],
-    ) -> BatchEncoding:
-        """Optionally discard the examples which exceed the tokenizer limit
-        from the training dataset."""
 
         if not discard_truncated_examples:
-            if labels is not None:
-                model_inputs["labels"] = labels["input_ids"]
-            # else:
-            #     model_inputs["labels"] = None
+            model_inputs["labels"] = labels["input_ids"]
         else:
-            assert labels is not None
             new_model_inputs = defaultdict(list)
             # overflow_to_sample_mapping is a list where each element is the original
             # index of the overflown batch sample at that position
             # currently this is not documented
             # https://github.com/huggingface/transformers/blob/6ce6d62b6f20040129ec9831e7c4f6576402ea42/src/transformers/tokenization_utils_fast.py#L469  # noqa
             overflow_to_sample_mapping = model_inputs["overflow_to_sample_mapping"]
-            overflow_sample_idx = self.get_overflow_sample_idx(model_inputs)
-            if overflow_sample_idx is None:
-                overflow_sample_idx = set()
+            overflow_sample_idx = set()
+            for idx in range(1, len(overflow_to_sample_mapping)):
+                if (
+                    overflow_to_sample_mapping[idx - 1]
+                    == overflow_to_sample_mapping[idx]
+                ):
+                    overflow_sample_idx.add(overflow_to_sample_mapping[idx])
             for idx, sample_idx in enumerate(overflow_to_sample_mapping):
                 if sample_idx not in overflow_sample_idx:
                     new_model_inputs["input_ids"].append(model_inputs["input_ids"][idx])
@@ -202,57 +179,7 @@ class Preprocessor(PipelineMixin):
                     )
                     new_model_inputs["labels"].append(labels["input_ids"][sample_idx])
             model_inputs = new_model_inputs
-            if self._debug:
-                self.assert_inputs_correct(
-                    model_inputs, self.tokenizer, self._prompt_start
-                )
-        return model_inputs
 
-    @staticmethod
-    def _read_column(column: str, examples) -> Optional[list[str]]:
-        if column not in examples:
-            return
-        data = []
-        for i in range(len(examples[column])):
-            if examples[column][i] is not None:
-                data.append(examples[column][i])
-        return data or None
-
-    @staticmethod
-    def get_overflow_sample_idx(
-        tokenizer_output: BatchEncoding,
-    ) -> Optional[set[int]]:
-        overflow_to_sample_mapping = tokenizer_output["overflow_to_sample_mapping"]
-        overflow_sample_idx = set()
-        for idx in range(1, len(overflow_to_sample_mapping)):
-            if overflow_to_sample_mapping[idx - 1] == overflow_to_sample_mapping[idx]:
-                overflow_sample_idx.add(overflow_to_sample_mapping[idx])
-        return overflow_sample_idx or None
-
-    def _extract_and_tokenize(
-        self,
-        examples: Batch,
-        truncation: bool,
-        discard_truncated_examples: bool,
-    ) -> BatchEncoding:
-        """Tokenize the input and target columns.
-
-        Args:
-            examples (Batch): a batch of preprocessed dataset
-
-        Returns:
-            Tokenized dataset batch with columns: input_ids, attention_mask, labels
-        """
-
-        model_inputs = self._tokenize_inputs(
-            examples, truncation, discard_truncated_examples
-        )
-        labels = self._tokenize_targets(
-            examples, truncation, discard_truncated_examples
-        )
-        model_inputs = self._maybe_discard_truncated_examples(
-            discard_truncated_examples, model_inputs, labels
-        )
         return model_inputs
 
     def _preprocess_pipeline(
@@ -268,7 +195,7 @@ class Preprocessor(PipelineMixin):
                 Processed batch
             """
             # deepcopy to ensure the pipeline does not mutate the input examples
-            # any mutation on the input examples in place will be reflected on the
+            # any mutation on the input exampels in place will be reflected on the
             # processed dataset regardless of the returned batch of this function
             # this will incur a memory penalty, but the pipeline will have no
             # side-effects
@@ -302,42 +229,27 @@ class Preprocessor(PipelineMixin):
             desc (Optional[str]): Meaningful description to be displayed alongside with
                 the progress bar while processing.
             truncation (bool): Whether to truncate the ids after tokenization.
-            discard_truncated_examples (bool): Whether to discard examples with inputs
+            discard_tuncated_examples (bool): Whether to discard examples with inputs
                 exceeding the max_source_length when tokenized.
 
         Returns:
             Processed dataset with features ['input_ids', 'attention_mask', 'labels']
         """
-        self._discarded_examples = 0
         self._dataset = dataset
-        n_input_samples = len(dataset)
-        logger.info(f"Input dataset contains {len(dataset)} examples ")
+
         column_names = dataset.column_names
-        dataset = dataset.map(
+        return dataset.map(
             self._preprocess_pipeline(
                 truncation=truncation,
                 discard_truncated_examples=discard_truncated_examples,
                 **process_kwargs,
             ),
             batched=True,
-            keep_in_memory=True,
             num_proc=self.num_proc,
             remove_columns=column_names,
             load_from_cache_file=self.load_from_cache_file,
             desc=desc if desc else "Processing and running tokenizer on dataset",
         )
-        discarded_examples = n_input_samples - (n_left := len(dataset))
-        if discarded_examples > 0:
-            perc_discard = (discarded_examples * 100) / n_input_samples
-            logger.info(
-                f"During preprocessing {discarded_examples} ({perc_discard:.2f}%) samples "
-                f"were discarded due to exceeding source input length limit. "
-                f"Processed dataset size: {n_left} examples"
-            )
-        self._discarded_examples = discarded_examples
-        return dataset
-
-
 
 
 class T5DSTPreprocessor(Preprocessor):

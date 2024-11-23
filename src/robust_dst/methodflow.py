@@ -1,4 +1,4 @@
-"""Implementation of a DAG pipeline, taken from https://github.com/WeixuanZ/methodflow/tree/main"""
+from __future__ import annotations
 
 import copy
 import inspect
@@ -6,8 +6,6 @@ import logging
 from typing import Any, Callable, Literal, Optional
 
 logger = logging.getLogger(__name__)
-
-Batch = Any
 
 
 class ProcessStep:
@@ -61,14 +59,14 @@ class ProcessStep:
     def out_to_run_degree(self) -> int:
         return sum(1 for _ in filter(lambda n: n.to_run, self.successors))
 
-    def __call__(self, examples, *args, **kwargs) -> Any:
+    def __call__(self, *args, **kwargs) -> Any:
         return self.func(*args, **kwargs)
 
     def __set__(self, obj, value) -> None:
         """Make ProcessStep a data descriptor."""
         raise AttributeError("Cannot change the value")
 
-    def __get__(self, obj, objtype=None) -> "ProcessStep":
+    def __get__(self, obj, objtype=None) -> ProcessStep:
         """Return the method wrapped."""
         if hasattr(self._func, "__get__"):
             self._bound_func = self._func.__get__(obj, objtype)
@@ -116,7 +114,7 @@ class PipelineMixin:
             raise RuntimeError("The given callable is not a processing step.")
         for condition_attr in step.condition_attrs:
             if not hasattr(self, condition_attr):
-                logger.warning(
+                logging.warning(
                     "The owner class of the pipeline does not have the condition"
                     f"attribute {condition_attr}, defaulting to True."
                 )
@@ -144,7 +142,7 @@ class PipelineMixin:
             for func_arg_name in node.func_arg_names:
                 if not func_arg_name.startswith("results_from_"):
                     continue
-                previous_step_name = func_arg_name[len("results_from_") :]
+                previous_step_name = func_arg_name[13:]
                 if previous_step_name not in name_to_node:
                     raise RuntimeError(
                         f"{previous_step_name} is not an available method."
@@ -180,21 +178,19 @@ class PipelineMixin:
 
         return pipeline[::-1]
 
-    def execute_pipeline(self, examples: Batch, *args, **kwargs) -> Any:
+    def execute_pipeline(self, *args, **kwargs) -> Any:
         """Execute the pipeline.
 
         The arguments are passed to the starting preprocess steps.
         """
-        pipeline: list[ProcessStep] = self._topological_sort(self._build_dag())
-        if not pipeline:
-            return examples
+        pipeline = self._topological_sort(self._build_dag())
         intermediate_results = {}
         output = []
         for step in pipeline:
             if step.to_run:
                 if step.in_degree == 0:
                     logger.info(f"Executing {step}")
-                    intermediate_results[step] = step(examples, *args, **kwargs)
+                    intermediate_results[step] = step(*args, **kwargs)
                 else:
                     params_from = list(
                         filter(lambda p: p in intermediate_results, step.predecessors)
@@ -221,4 +217,5 @@ class PipelineMixin:
             else:
                 logger.info(f"Skipping {step}")
                 intermediate_results[step] = PipelineMixin.StepSkipped
+
         return output[0] if len(output) == 1 else tuple(output)
