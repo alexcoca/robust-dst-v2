@@ -27,7 +27,6 @@ from pathlib import Path
 import datasets
 import transformers
 from datasets import load_dataset
-from mwzeval.metrics import Multiwoz24Evaluator
 from omegaconf import DictConfig, OmegaConf
 from torch.optim import Adam
 from transformers import (
