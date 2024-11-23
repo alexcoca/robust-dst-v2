@@ -37,7 +37,7 @@ from typing import Any, Optional
 from datasets import Dataset
 from transformers import BatchEncoding, PreTrainedTokenizer, PreTrainedTokenizerFast
 
-from pytod.trainer.methodflow import PipelineMixin
+from robust_dst.methodflow import PipelineMixin
 
 logger = logging.getLogger(__name__)
 
