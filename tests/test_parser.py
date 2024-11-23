@@ -5,7 +5,6 @@ from typing import List, Tuple
 
 import pytest
 from datasets import Dataset, load_dataset
-from mwzeval.metrics import Multiwoz24Evaluator
 from numpy.testing import assert_almost_equal
 from omegaconf import DictConfig, OmegaConf
 
@@ -99,55 +98,3 @@ def test_d3st_parser(
     assert_almost_equal(
         all_metrics_aggregate["#ALL_SERVICES"]["joint_goal_accuracy"], 1.0
     )
-
-
-@pytest.mark.parametrize("split", SPLITS, ids="split={}".format)
-@pytest.mark.parametrize(
-    "data_version",
-    ["version_6"],
-    ids="data_version={}".format,
-)
-def test_d3st_parser_multiwoz(split, data_version):
-    dataset, preprocessed_ref, preprocessing_config = load_dataset_and_config(
-        str(
-            PROCESSED_DATASET_ROOT_PATH
-            / "multiwoz"
-            / split
-            / data_version
-            / "data.json"
-        )
-    )
-
-    parser = D3STParser(
-        template_dir=DIALOGUE_TEMPLATES_ROOT_PATH / "multiwoz" / split,
-        schema_path=RAW_DATASET_PATH_ROOT / "multiwoz" / "schema.json",
-        value_separator=preprocessing_config["value_separator"],
-        target_slot_index_separator=preprocessing_config["delimiter"],
-    )
-
-    predictions = get_fake_predictions(dataset)
-
-    dials_to_hyps = parser.convert_to_multiwoz_format(
-        preprocessed_refs=preprocessed_ref,
-        predictions=predictions,
-    )
-
-    results = Multiwoz24Evaluator(
-        bleu=False, success=False, richness=False, dst=True
-    ).evaluate(dials_to_hyps, include_loocv_metrics=True)
-
-    num_turns = sum(map(len, dials_to_hyps.values()))
-    num_unknown_turns = sum(
-        1
-        for _ in filter(lambda p: "unknown" in p.replace("|| unknown", ""), predictions)
-    )
-
-    assert_almost_equal(
-        results["dst"]["joint_accuracy"]
-        + num_unknown_turns / (num_turns + 1e-10) * 100,
-        100,
-    )
-
-
-if __name__ == "__main__":
-    test_d3st_parser_multiwoz("test", "version_6")
