@@ -33,20 +33,9 @@ In order to set up the necessary environment:
    ```
 4. install PyTorch
    ```bash
-   pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+   pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
    ```
-5. Install MultiWOZ evaluator
-   From the project root directory,
-   ```bash
-   git clone git@github.com:WeixuanZ/MultiWOZ_Evaluation.git ./src
-   pip install -e ./src/MultiWOZ_Evaluation
-   ```
-6. Install Methodflow
-   From the project root directory,
-   ```bash
-   git clone --branch 0.0.1a1 git@github.com:WeixuanZ/methodflow.git ./src
-   pip install -e ./src/methodflow
-   ```
+
 
 > **_NOTE:_**  The conda environment will have robust-dst installed in editable mode.
 > Some changes, e.g. in `setup.cfg`, might require you to run `pip install -e .` again.
@@ -101,18 +90,6 @@ python -m scripts.preprocess_d3st_sgd \
   -vv
 ```
 
-Preprocess MultiWOZ dataset using
-```bash
-python -m scripts.preprocess_d3st_multiwoz \
-  -d data/raw/multiwoz/ \
-  --schema_file data/raw/multiwoz/schema.json \
-  --dialogue_acts_file data/raw/multiwoz/dialog_acts.json \
-  -o data/processed/ \
-  -c configs/data_processing_d3st_multiwoz.yaml \
-  --all \
-  -vv
-```
-
 ### T5DST Format
 
 Preprocess SGD dataset using
@@ -134,19 +111,7 @@ done
 2. Complete the relevant configuration file with:
    * Paths to the processed dataset
    * wandb account details
-3. Use the follwing commands
-
-### D3ST on SGD
-
-```python
-
-```
-
-### D3ST on MultiWOZ
-
-```python
-```
-
+3. Check out `README_EXP.md`
 
 ## Citation
 
