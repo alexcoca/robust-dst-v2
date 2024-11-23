@@ -23,6 +23,7 @@ import re
 import sys
 from itertools import chain
 from pathlib import Path
+from typing import Union
 
 import datasets
 import transformers
@@ -76,6 +77,8 @@ require_version(
 )
 
 logger = logging.getLogger(__name__)
+
+
 
 def main():
     # See all possible arguments in src/transformers/training_args.py
@@ -668,13 +671,7 @@ def main():
         else None,
     )
 
-    # Training
-    if training_args.do_train:
-        checkpoint = None
-        if training_args.resume_from_checkpoint is not None:
-            checkpoint = training_args.resume_from_checkpoint
-        elif last_checkpoint is not None:
-            checkpoint = last_checkpoint
+    def create_and_save_model_config(path: Union[str, Path]) -> None:
         config = {
             "data": preprocessing_configs,
             "train_arguments": {
@@ -685,11 +682,28 @@ def main():
             "data_args": data_args.__dict__,
             "model_args": model_args.__dict__,
         }
+
+        # it's better to use pydantic here, but HuggingFace config classes have
+        # inconsistencies in type annoations at the time of writing this code
+        if "distributed_state" in config["train_arguments"]:
+            distributed_state_str = str(config["train_arguments"]["distributed_state"])
+            config["train_arguments"]["distributed_state"] = distributed_state_str
+
         model_config = OmegaConf.create(config)
         # needed for post-hoc parsing of raw predictions
-        OmegaConf.save(
-            config=model_config, f=output_dir_pth.joinpath("experiment_config.yaml")
-        )
+        OmegaConf.save(config=model_config, f=path)
+
+
+    # Training
+    if training_args.do_train:
+        logger.info("*** Train ***")
+        create_and_save_model_config(output_dir_pth.joinpath("experiment_config.yaml"))
+
+        checkpoint = None
+        if training_args.resume_from_checkpoint is not None:
+            checkpoint = training_args.resume_from_checkpoint
+        elif last_checkpoint is not None:
+            checkpoint = last_checkpoint
         logger.info("Starting training...")
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
         trainer.log_config_to_wandb(config)
