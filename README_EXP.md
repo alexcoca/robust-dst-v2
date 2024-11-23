@@ -35,6 +35,7 @@ Seeds used by W Zhang:
 
 
 ```bash
+# if you test on sgd-x
 python -m scripts.preprocess_d3st_sgd \
   -d data/raw/original/ \
   -d data/raw/v1/ \
@@ -42,6 +43,14 @@ python -m scripts.preprocess_d3st_sgd \
   -d data/raw/v3/ \
   -d data/raw/v4/ \
   -d data/raw/v5/ \
+  -o data/processed/ \
+  -c configs/data_processing_d3st_sgd.yaml \
+  --all \
+  -vv
+
+# otherwise, for just training on SGD
+python -m scripts.preprocess_d3st_sgd \
+  -d data/raw/original/ \
   -o data/processed/ \
   -c configs/data_processing_d3st_sgd.yaml \
   --all \
