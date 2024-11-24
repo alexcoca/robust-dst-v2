@@ -477,12 +477,12 @@ class CustomSeq2SeqTrainingArguments(Seq2SeqTrainingArguments):
         metadata={
             "help": (
                 "Use in conjunction with `load_best_model_at_end` to specify the metric"
-                " to use to compare two differentmodels. Must be the name of a metric"
+                " to use to compare two different models. Must be the name of a metric"
                 " returned by the evaluation with or without the prefix `'eval_'`."
-                " Willdefault to `'loss'` if unspecified and"
+                " Will default to `'loss'` if unspecified and"
                 " `load_best_model_at_end=True` (to use the evaluation loss).If you set"
                 " this value, `greater_is_better` will default to `True`. Don't forget"
-                " to set it to `False` ifyour metric is better when lower."
+                " to set it to `False` if your metric is better when lower."
             )
         },
     )
@@ -491,7 +491,7 @@ class CustomSeq2SeqTrainingArguments(Seq2SeqTrainingArguments):
         metadata={
             "help": (
                 "Used to stop training when the metric specified in"
-                " `metric_for_best_model` fails to improve forthe specified number of"
+                " `metric_for_best_model` fails to improve for the specified number of"
                 " evaluation calls."
             ),
         },

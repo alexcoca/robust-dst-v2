@@ -9,9 +9,9 @@ from collections import defaultdict
 from typing import Optional
 
 from datasets import Dataset, load_dataset
-from methodflow.pipeline import PipelineMixin
+from robust_dst.methodflow import PipelineMixin
 from tqdm import tqdm
-from transformers import PreTrainedTokenizer
+from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class Preprocessor(PipelineMixin):
                 tokenization. Defaults to "".
         """
         self.tokenize = tokenize
-        if self.tokenize and not isinstance(tokenizer, PreTrainedTokenizer):
+        if self.tokenize and not isinstance(tokenizer, (PreTrainedTokenizer, PreTrainedTokenizerFast)):
             raise RuntimeError(
                 "A tokenizer must be specified if tokenization is desired"
             )

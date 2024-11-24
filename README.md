@@ -11,9 +11,7 @@
 
 # robust-dst
 
-> Add a short description here!
-
-A longer description of your project goes here...
+Code replicating D3ST.
 
 ## Installation
 
@@ -33,20 +31,9 @@ In order to set up the necessary environment:
    ```
 4. install PyTorch
    ```bash
-   pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+   pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
    ```
-5. Install MultiWOZ evaluator
-   From the project root directory,
-   ```bash
-   git clone git@github.com:WeixuanZ/MultiWOZ_Evaluation.git ./src
-   pip install -e ./src/MultiWOZ_Evaluation
-   ```
-6. Install Methodflow
-   From the project root directory,
-   ```bash
-   git clone --branch 0.0.1a1 git@github.com:WeixuanZ/methodflow.git ./src
-   pip install -e ./src/methodflow
-   ```
+
 
 > **_NOTE:_**  The conda environment will have robust-dst installed in editable mode.
 > Some changes, e.g. in `setup.cfg`, might require you to run `pip install -e .` again.
@@ -54,7 +41,7 @@ In order to set up the necessary environment:
 
 Optional and needed only once after `git clone`:
 
-7. install several [pre-commit] git hooks with:
+5. install several [pre-commit] git hooks with:
    ```bash
    pre-commit install
    # You might also want to run `pre-commit autoupdate`
@@ -62,20 +49,13 @@ Optional and needed only once after `git clone`:
    and checkout the configuration under `.pre-commit-config.yaml`.
    The `-n, --no-verify` flag of `git commit` can be used to deactivate pre-commit hooks temporarily.
 
-8. install [nbstripout] git hooks to remove the output cells of committed notebooks with:
-   ```bash
-   nbstripout --install --attributes notebooks/.gitattributes
-   ```
-   This is useful to avoid large diffs due to plots in your notebooks.
-   A simple `nbstripout --uninstall` will revert these changes.
-
 
 Then take a look into the `scripts` and `src` folders.
 
 
 ## Preparing and Preprocessing Data
 
-Download the SGD and MultiWOZ datasets by running
+Download the SGD dataset by running
 ```bash
 chmod +x scripts/prepare_datasets.sh
 ./scripts/prepare_datasets
@@ -83,10 +63,10 @@ chmod +x scripts/prepare_datasets.sh
 
 ### D3ST Format
 
-SGD and MultiWOZ datasets should be first preprocessed into a dataset-agnostic format,
+SGD dataset should be first preprocessed into a dataset-agnostic format,
 which follows the baseline D3ST format and contains the necessary metadata.
 
-Preprocess SGD dataset using
+If intending to evaluate on SGD-X, preprocess SGD dataset using
 ```bash
 python -m scripts.preprocess_d3st_sgd \
   -d data/raw/original/ \
@@ -101,17 +81,18 @@ python -m scripts.preprocess_d3st_sgd \
   -vv
 ```
 
-Preprocess MultiWOZ dataset using
+else 
+
 ```bash
-python -m scripts.preprocess_d3st_multiwoz \
-  -d data/raw/multiwoz/ \
-  --schema_file data/raw/multiwoz/schema.json \
-  --dialogue_acts_file data/raw/multiwoz/dialog_acts.json \
+python -m scripts.preprocess_d3st_sgd \
+  -d data/raw/original/ \
   -o data/processed/ \
-  -c configs/data_processing_d3st_multiwoz.yaml \
+  -c configs/data_processing_d3st_sgd.yaml \
   --all \
   -vv
 ```
+
+
 
 ### T5DST Format
 
@@ -127,26 +108,12 @@ do
 done
 ```
 
-
 ## Reproducing Baselines
 
 1. Install the dependencies, prepare and preprocess the datasets as in previous sections.
 2. Complete the relevant configuration file with:
    * Paths to the processed dataset
-   * wandb account details
-3. Use the follwing commands
-
-### D3ST on SGD
-
-```python
-
-```
-
-### D3ST on MultiWOZ
-
-```python
-```
-
+3. Check out `README_EXP.md`
 
 ## Citation
 

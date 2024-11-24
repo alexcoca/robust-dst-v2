@@ -23,13 +23,11 @@ import re
 import sys
 from itertools import chain
 from pathlib import Path
+from typing import Union
 
 import datasets
-import nltk  # Here to have a nice missing dependency error message early on
 import transformers
 from datasets import load_dataset
-from filelock import FileLock
-from mwzeval.metrics import Multiwoz24Evaluator
 from omegaconf import DictConfig, OmegaConf
 from torch.optim import Adam
 from transformers import (
@@ -44,7 +42,6 @@ from transformers import (
     is_wandb_available,
     set_seed,
 )
-from transformers.file_utils import is_offline_mode
 from transformers.trainer_callback import EarlyStoppingCallback
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
@@ -62,7 +59,6 @@ from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor
 from robust_dst.scoring_utils import (
     flatten_metrics_dict,
     setup_evaluator_output_dirs,
-    setup_multiwoz_evaluation,
     setup_sgd_evaluation,
 )
 from robust_dst.trainer import CustomTrainer
@@ -82,16 +78,6 @@ require_version(
 
 logger = logging.getLogger(__name__)
 
-try:
-    nltk.data.find("tokenizers/punkt")
-except (LookupError, OSError):
-    if is_offline_mode():
-        raise LookupError(
-            "Offline mode: run this script without TRANSFORMERS_OFFLINE first to"
-            " download nltk data files"
-        )
-    with FileLock(".lock") as lock:
-        nltk.download("punkt", quiet=True)
 
 
 def main():
@@ -409,18 +395,6 @@ def main():
             )
 
         domain_in_desc = False
-        if "multiwoz" in data_format:
-            desc_formats = {
-                preprocessing_config.preprocessing.description_type
-                for preprocessing_config in preprocessing_configs.values()
-            }
-            if len(desc_formats) > 1:
-                raise RuntimeError(
-                    "train, validation and test datasets have different description"
-                    " formats"
-                )
-            domain_in_desc = desc_formats.pop() == "full_desc_with_domain"
-
         preprocessor = D3STPreprocessor(
             delimiter=delimiters.pop(),
             domain_in_desc=domain_in_desc,
@@ -457,9 +431,7 @@ def main():
 
     if training_args.do_eval:
         preprocessor.max_target_length = data_args.val_max_target_length
-        training_args.data_variant = (
-            "multiwoz" if "multiwoz" in data_format else "original"
-        )
+        training_args.data_variant = "original"
         if "validation" not in raw_datasets:
             raise ValueError("--do_eval requires a validation dataset")
         eval_dataset = raw_datasets["validation"]
@@ -473,20 +445,12 @@ def main():
                 eval_dataset,
                 desc="Running tokenizer on validation dataset",
             )
-        if "multiwoz" in data_format:
-            parser_inputs = setup_multiwoz_evaluation(
-                data_args, preprocessing_configs, raw_preprocessed_refs, "validation"
-            )
-        else:
-            parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
-                data_args, preprocessing_configs, raw_preprocessed_refs, "validation"
-            )
+        parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
+            data_args, preprocessing_configs, raw_preprocessed_refs, "validation"
+        )
 
     if training_args.do_predict:
-        if "multiwoz" in data_format:
-            data_variant = "multiwoz"
-        else:
-            data_variant = infer_schema_variant_from_path(data_args.test_file)
+        data_variant = infer_schema_variant_from_path(data_args.test_file)
         training_args.run_name = f"{training_args.run_name}_{data_variant}"
         logger.info(f"Prediction results will be logged under {training_args.run_name}")
         if is_wandb_available():
@@ -529,20 +493,9 @@ def main():
                 desc="Running tokenizer on prediction dataset",
                 iterative_decoding=data_args.iterative_decoding,
             )
-        if "multiwoz" in data_format:
-            parser_inputs = setup_multiwoz_evaluation(
-                data_args, preprocessing_configs, raw_preprocessed_refs, "test"
-            )
-        else:
-            parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
-                data_args, preprocessing_configs, raw_preprocessed_refs, "test"
-            )
-
-    if training_args.do_eval or training_args.do_predict:
-        if "multiwoz" in data_format:
-            multiwoz_evaluator = Multiwoz24Evaluator(
-                bleu=False, success=False, richness=False, dst=True
-            )
+        parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
+            data_args, preprocessing_configs, raw_preprocessed_refs, "test"
+        )
 
     # Optimizer and scheduler
     optimizer, scheduler = None, None
@@ -599,9 +552,7 @@ def main():
         parser = D3STParser(
             value_separator=parser_inputs["preproc_config"]["value_separator"],
             target_slot_index_separator=parser_inputs["preproc_config"]["delimiter"],
-            restore_categorical_case=False
-            if "multiwoz" in data_format
-            else parser_inputs["preproc_config"]["lowercase"],
+            restore_categorical_case=parser_inputs["preproc_config"]["lowercase"],
             **parser_init_kwargs,
         )
     else:
@@ -648,9 +599,6 @@ def main():
             $file_to_hyp_dials is a mapping
                 - For SGD: from SGD dialogue filenames (e.g., `dialogues_001.json`) to
                     lists of SGD-format dialogues, or
-                - For MultiWOZ: from the key "data.json" to state predicitions
-                    formatted according to the official MultiWOZ evaluation script
-                    (https://github.com/Tomiinek/MultiWOZ_Evaluation).
 
             The key-values "all_metric_aggregate", "file_to_hyp_dials" and
             "raw_predictions" are popped off and used to save metrics and
@@ -665,69 +613,24 @@ def main():
 
         logger.info("Computing metrics")
         preproc_refs = parser_inputs["preprocessed_refs"]
+        file_to_hyp_dials = parser.convert_to_sgd_format(
+            preprocessed_refs=preproc_refs,
+            predictions=predictions,
+        )
+        assert len(predictions) == len(
+            preproc_refs
+        ), f"Expected {len(preproc_refs)} predictions but got {len(predictions)}"
 
-        if "multiwoz" in data_format:
-            dials_to_hyps = parser.convert_to_multiwoz_format(
-                preprocessed_refs=preproc_refs,
-                predictions=predictions,
-            )
-            file_to_hyp_dials = {"data.json": dials_to_hyps}
-            # note that the evaluator has side effects on dials_to_hyps!
-            # the evaluator will apply value normalization in place,
-            # requires deepcopy if the parser output is used elsewhere downstream
-            all_metrics_aggregate = multiwoz_evaluator.evaluate(
-                dials_to_hyps, include_loocv_metrics=True
-            )["dst"]
-            """
-            all_metrics_aggregate is of the form
-            {
-                "slot_f1": xx,
-                "slot_precision": xx,
-                "slot_recall": xx,
-                "only_[domain_name]": {
-                    "slot_f1": xx,
-                    "slot_precision": xx,
-                    "slot_recall": xx,
-                },
-                "except_[domain_name]": {
-                    "slot_f1": xx,
-                    "slot_precision": xx,
-                    "slot_recall": xx,
-                }
-            }
-            "only_[domain_name]" and "except_[domain_name]" are for leave-one-out
-            setup evaluation.
-            """
-            # flatten metrics dict
-            result = {}
-            for (
-                metric_name_or_domain,
-                metric_val_or_domain_metrics,
-            ) in all_metrics_aggregate.items():
-                if isinstance(metric_val_or_domain_metrics, dict):
-                    for metric_name, metric_val in metric_val_or_domain_metrics.items():
-                        result[f"{metric_name_or_domain}/{metric_name}"] = metric_val
-                else:
-                    result[metric_name_or_domain] = metric_val_or_domain_metrics
-        else:
-            file_to_hyp_dials = parser.convert_to_sgd_format(
-                preprocessed_refs=preproc_refs,
-                predictions=predictions,
-            )
-            assert len(predictions) == len(
-                preproc_refs
-            ), f"Expected {len(preproc_refs)} predictions but got {len(predictions)}"
-
-            dataset_hyp = {
-                dial["dialogue_id"]: dial for dial in chain(*file_to_hyp_dials.values())
-            }
-            all_metrics_aggregate, _ = get_metrics(
-                dataset_ref=sgd_evaluator_inputs["dataset_ref"],
-                dataset_hyp=dataset_hyp,
-                service_schemas=sgd_evaluator_inputs["eval_services"],
-                in_domain_services=sgd_evaluator_inputs["in_domain_services"],
-            )
-            result = flatten_metrics_dict(all_metrics_aggregate)  # type: dict
+        dataset_hyp = {
+            dial["dialogue_id"]: dial for dial in chain(*file_to_hyp_dials.values())
+        }
+        all_metrics_aggregate, _ = get_metrics(
+            dataset_ref=sgd_evaluator_inputs["dataset_ref"],
+            dataset_hyp=dataset_hyp,
+            service_schemas=sgd_evaluator_inputs["eval_services"],
+            in_domain_services=sgd_evaluator_inputs["in_domain_services"],
+        )
+        result = flatten_metrics_dict(all_metrics_aggregate)  # type: dict
 
         logger.info("all metrics aggregate", all_metrics_aggregate)
         result["all_metrics_aggregate"] = all_metrics_aggregate
@@ -768,13 +671,7 @@ def main():
         else None,
     )
 
-    # Training
-    if training_args.do_train:
-        checkpoint = None
-        if training_args.resume_from_checkpoint is not None:
-            checkpoint = training_args.resume_from_checkpoint
-        elif last_checkpoint is not None:
-            checkpoint = last_checkpoint
+    def create_and_save_model_config(path: Union[str, Path]) -> None:
         config = {
             "data": preprocessing_configs,
             "train_arguments": {
@@ -785,11 +682,28 @@ def main():
             "data_args": data_args.__dict__,
             "model_args": model_args.__dict__,
         }
+
+        # it's better to use pydantic here, but HuggingFace config classes have
+        # inconsistencies in type annoations at the time of writing this code
+        if "distributed_state" in config["train_arguments"]:
+            distributed_state_str = str(config["train_arguments"]["distributed_state"])
+            config["train_arguments"]["distributed_state"] = distributed_state_str
+
         model_config = OmegaConf.create(config)
         # needed for post-hoc parsing of raw predictions
-        OmegaConf.save(
-            config=model_config, f=output_dir_pth.joinpath("experiment_config.yaml")
-        )
+        OmegaConf.save(config=model_config, f=path)
+
+
+    # Training
+    if training_args.do_train:
+        logger.info("*** Train ***")
+        create_and_save_model_config(output_dir_pth.joinpath("experiment_config.yaml"))
+
+        checkpoint = None
+        if training_args.resume_from_checkpoint is not None:
+            checkpoint = training_args.resume_from_checkpoint
+        elif last_checkpoint is not None:
+            checkpoint = last_checkpoint
         logger.info("Starting training...")
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
         trainer.log_config_to_wandb(config)
