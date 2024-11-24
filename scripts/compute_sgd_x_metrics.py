@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+import sys
 from copy import deepcopy
 from pathlib import Path
 
@@ -120,6 +121,13 @@ def get_metric_sensitivity(scores: np.ndarray) -> float:
     ),
 )
 @click.option(
+    "-o",
+    "--original",
+    "original",
+    is_flag=True,
+    default=True,
+)
+@click.option(
     "-a",
     "--average",
     "average_across_models",
@@ -132,12 +140,15 @@ def main(
     version: str,
     models: tuple[str],
     metric: str,
+    original: bool,
     average_across_models: bool,
 ):
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         level=logging.INFO,
     )
+    if original:
+        schema_variants = ("original",)
     # TODO: SAVE SGD_X METRICS IN .JSON FORMAT IN APPROPRIATE LOCATION
     assert isinstance(schema_variants, tuple)
     schema_variants = list(schema_variants)
@@ -341,6 +352,8 @@ def main(
         logger.info("Average JGA across models")
         aggregate_values(jga_across_models, "mean")
         logger.info(default_to_regular(jga_across_models))
+    if original:
+        sys.exit()
 
     # calculate SS
     ss_across_models = nested_defaultdict(list, depth=2)
