@@ -11,9 +11,7 @@
 
 # robust-dst
 
-> Add a short description here!
-
-A longer description of your project goes here...
+Code replicating D3ST.
 
 ## Installation
 
@@ -43,7 +41,7 @@ In order to set up the necessary environment:
 
 Optional and needed only once after `git clone`:
 
-7. install several [pre-commit] git hooks with:
+5. install several [pre-commit] git hooks with:
    ```bash
    pre-commit install
    # You might also want to run `pre-commit autoupdate`
@@ -51,20 +49,13 @@ Optional and needed only once after `git clone`:
    and checkout the configuration under `.pre-commit-config.yaml`.
    The `-n, --no-verify` flag of `git commit` can be used to deactivate pre-commit hooks temporarily.
 
-8. install [nbstripout] git hooks to remove the output cells of committed notebooks with:
-   ```bash
-   nbstripout --install --attributes notebooks/.gitattributes
-   ```
-   This is useful to avoid large diffs due to plots in your notebooks.
-   A simple `nbstripout --uninstall` will revert these changes.
-
 
 Then take a look into the `scripts` and `src` folders.
 
 
 ## Preparing and Preprocessing Data
 
-Download the SGD and MultiWOZ datasets by running
+Download the SGD dataset by running
 ```bash
 chmod +x scripts/prepare_datasets.sh
 ./scripts/prepare_datasets
@@ -72,10 +63,10 @@ chmod +x scripts/prepare_datasets.sh
 
 ### D3ST Format
 
-SGD and MultiWOZ datasets should be first preprocessed into a dataset-agnostic format,
+SGD dataset should be first preprocessed into a dataset-agnostic format,
 which follows the baseline D3ST format and contains the necessary metadata.
 
-Preprocess SGD dataset using
+If intending to evaluate on SGD-X, preprocess SGD dataset using
 ```bash
 python -m scripts.preprocess_d3st_sgd \
   -d data/raw/original/ \
@@ -89,6 +80,19 @@ python -m scripts.preprocess_d3st_sgd \
   --all \
   -vv
 ```
+
+else 
+
+```bash
+python -m scripts.preprocess_d3st_sgd \
+  -d data/raw/original/ \
+  -o data/processed/ \
+  -c configs/data_processing_d3st_sgd.yaml \
+  --all \
+  -vv
+```
+
+
 
 ### T5DST Format
 
@@ -104,13 +108,11 @@ do
 done
 ```
 
-
 ## Reproducing Baselines
 
 1. Install the dependencies, prepare and preprocess the datasets as in previous sections.
 2. Complete the relevant configuration file with:
    * Paths to the processed dataset
-   * wandb account details
 3. Check out `README_EXP.md`
 
 ## Citation
