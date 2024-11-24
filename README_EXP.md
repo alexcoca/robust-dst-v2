@@ -65,7 +65,10 @@ torchrun \
   --rdzv_endpoint "$HOST:$PORT" \
   -m scripts.run_dialogue_state_tracking "configs/train_d3st_sgd_baseline.json"
 
+# SGD-X evaluation
 declare -a SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
+# SGD evaluation
+declare -a SHARDS=("original")
 for SGD_SHARD in "${SHARDS[@]}"
 do
   python -m scripts.run_dialogue_state_tracking \
@@ -86,7 +89,7 @@ do
     --val_max_target_length 512
 
 done
-
+# NB: -mod can be specified multiple times together with the --average flag to average results across seeds
 python -m scripts.compute_sgd_x_metrics \
   -ver $VERSION \
   -h hyps \
@@ -305,7 +308,7 @@ torchrun \
   --rdzv_backend c10d \
   --rdzv_endpoint "$HOST:$PORT" \
   -m scripts.run_dialogue_state_tracking "configs/train_d3st_sgd_turn.json"
-
+# SGD-X evaluation
 declare -a SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
 for SGD_SHARD in "${SHARDS[@]}"
 do
