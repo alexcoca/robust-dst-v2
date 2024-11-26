@@ -6,7 +6,7 @@ from transformers import (
     TrainerCallback,
     TrainerControl,
     TrainerState,
-    is_torch_tpu_available,
+    is_torch_tpu_available, EarlyStoppingCallback, TrainingArguments,
 )
 from transformers.integrations import WandbCallback
 
@@ -174,3 +174,28 @@ class CustomWandbCallback(WandbCallback):
                         "train/global_step": current_step,
                     }
                 )
+
+
+class JGAEarlyStoppingCallback(EarlyStoppingCallback):
+
+    def on_evaluate(self, args, state, control, metrics, **kwargs):
+        metric_to_check = args.metric_for_best_model
+        if not metric_to_check.startswith("eval_"):
+            metric_to_check = f"eval_{metric_to_check}"
+        metric_value = metrics.get(metric_to_check)
+
+        if metric_value is None:
+            logger.warning(
+                f"early stopping required metric_for_best_model, but did not find {metric_to_check} so early stopping"
+                " is disabled"
+            )
+            return
+        logger.info(f"{metric_to_check} at step {state.global_step}: {metric_value:4f}")
+        self.check_metric_value(args, state, control, metric_value)
+        if self.early_stopping_patience_counter >= self.early_stopping_patience:
+            logger.info(
+                f"Stopping training as {metric_to_check} has not improved "
+                f"in {self.early_stopping_patience} evaluations."
+            )
+            control.should_training_stop = True
+

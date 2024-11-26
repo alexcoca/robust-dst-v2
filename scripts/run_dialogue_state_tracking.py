@@ -42,12 +42,11 @@ from transformers import (
     is_wandb_available,
     set_seed,
 )
-from transformers.trainer_callback import EarlyStoppingCallback
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
-from robust_dst.callbacks import CacheManagerCallback, CustomWandbCallback
+from robust_dst.callbacks import CacheManagerCallback, CustomWandbCallback, JGAEarlyStoppingCallback
 from robust_dst.cli import (
     CustomSeq2SeqTrainingArguments,
     DataTrainingArguments,
@@ -639,7 +638,7 @@ def main():
         return result
 
     # Callbacks
-    early_stopping_callback = EarlyStoppingCallback(
+    early_stopping_callback = JGAEarlyStoppingCallback(
         training_args.early_stopping_patience
     )
     if is_wandb_available():
@@ -706,7 +705,6 @@ def main():
             checkpoint = last_checkpoint
         logger.info("Starting training...")
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
-        trainer.log_config_to_wandb(config)
         trainer.save_model()  # Saves the tokenizer too for easy upload
         metrics = train_result.metrics
         max_train_samples = (
