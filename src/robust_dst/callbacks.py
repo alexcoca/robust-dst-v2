@@ -6,7 +6,8 @@ from transformers import (
     TrainerCallback,
     TrainerControl,
     TrainerState,
-    is_torch_tpu_available, EarlyStoppingCallback, TrainingArguments,
+    is_torch_tpu_available,
+    EarlyStoppingCallback,
 )
 from transformers.integrations import WandbCallback
 
