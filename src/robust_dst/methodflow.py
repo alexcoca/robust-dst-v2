@@ -7,6 +7,7 @@ from typing import Any, Callable, Literal, Optional
 
 logger = logging.getLogger(__name__)
 
+Batch = Any
 
 class ProcessStep:
     """Wrapper of Callable, with info to build the pipeline."""
@@ -59,7 +60,7 @@ class ProcessStep:
     def out_to_run_degree(self) -> int:
         return sum(1 for _ in filter(lambda n: n.to_run, self.successors))
 
-    def __call__(self, *args, **kwargs) -> Any:
+    def __call__(self, examples, *args, **kwargs) -> Any:
         return self.func(*args, **kwargs)
 
     def __set__(self, obj, value) -> None:
@@ -178,19 +179,21 @@ class PipelineMixin:
 
         return pipeline[::-1]
 
-    def execute_pipeline(self, *args, **kwargs) -> Any:
+    def execute_pipeline(self, examples: Batch, *args, **kwargs) -> Any:
         """Execute the pipeline.
 
         The arguments are passed to the starting preprocess steps.
         """
         pipeline = self._topological_sort(self._build_dag())
+        if not pipeline:
+            return examples
         intermediate_results = {}
         output = []
         for step in pipeline:
             if step.to_run:
                 if step.in_degree == 0:
                     logger.info(f"Executing {step}")
-                    intermediate_results[step] = step(*args, **kwargs)
+                    intermediate_results[step] = step(examples, *args, **kwargs)
                 else:
                     params_from = list(
                         filter(lambda p: p in intermediate_results, step.predecessors)
