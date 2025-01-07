@@ -424,6 +424,7 @@ def main():
                 train_dataset,
                 desc="Running tokenizer on train dataset",
                 augment_style=data_args.augment_style,
+                truncation=False,
                 omit_confirmation_turns=data_args.omit_confirmation_turns,
                 discard_truncated_examples=data_args.discard_truncated_examples,
             )
@@ -446,6 +447,7 @@ def main():
         ):
             eval_dataset = preprocessor.process(
                 eval_dataset,
+                truncation=False,
                 desc="Running tokenizer on validation dataset",
             )
         parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
