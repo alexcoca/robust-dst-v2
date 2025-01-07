@@ -32,7 +32,7 @@
   "save_steps": 2500,
   "early_stopping_patience": 3,
   "load_best_model_at_end": true,
-  "report_to": "wandb",
+  "report_to": "none",
   "wandb_entity": "",
   "wandb_project": "",
   "wandb_log_model": false,
