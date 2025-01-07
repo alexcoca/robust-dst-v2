@@ -10,3 +10,6 @@ bash scripts/preprocess_sdt/prepare_sgd_sdt_data.sh
 ```
 
 Check the script file for detailed implementation of the process.
+```bash
+python scripts/run_dialogue_state_tracking.py "configs/replicate_sdt_v0.json"
+```
