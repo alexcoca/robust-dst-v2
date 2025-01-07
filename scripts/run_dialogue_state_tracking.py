@@ -53,7 +53,7 @@ from robust_dst.cli import (
     ModelArguments,
 )
 from robust_dst.evaluation import get_metrics
-from robust_dst.parser import D3STParser, T5DSTParser
+from robust_dst.parser import D3STParser, T5DSTParser, SDTParser
 from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor, SDTPreprocessor
 from robust_dst.scoring_utils import (
     flatten_metrics_dict,
@@ -558,6 +558,10 @@ def main():
             restore_categorical_case=parser_inputs["preproc_config"]["lowercase"],
             **parser_init_kwargs,
         )
+    elif "sdt" in data_format:
+        parser = SDTParser(
+            data_format=data_format,
+            **parser_init_kwargs)
     else:
         parser = T5DSTParser(
             data_format=data_format,
