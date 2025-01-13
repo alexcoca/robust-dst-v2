@@ -6,7 +6,7 @@ import logging
 import random
 import re
 from collections import defaultdict
-from typing import Optional
+from typing import Optional, Any
 
 from datasets import Dataset, load_dataset
 from robust_dst.methodflow import PipelineMixin
@@ -16,7 +16,7 @@ from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
 logger = logging.getLogger(__name__)
 
 
-Batch = dict[str, list]
+Batch = Any
 
 
 class ValueType:
@@ -268,6 +268,66 @@ class T5DSTPreprocessor(Preprocessor):
             dataset, desc=desc, truncation=truncation, **process_kwargs
         )
 
+class SDTPreprocessor(Preprocessor):
+
+    def execute_pipeline(self, examples: Any, *args, **kwargs) -> Any:
+        """Execute the pipeline.
+
+        The arguments are passed to the starting preprocess steps.
+        """
+        pipeline = self._topological_sort(self._build_dag())
+        if not pipeline:
+            return examples
+        intermediate_results = {}
+        output = []
+        for step in pipeline:
+            if step.to_run:
+                if step.in_degree == 0:
+                    logger.info(f"Executing {step}")
+                    intermediate_results[step] = step(examples, *args, **kwargs)
+                else:
+                    params_from = list(
+                        filter(lambda p: p in intermediate_results, step.predecessors)
+                    )
+                    logger.info(f"Executing {step}, with outputs from {params_from}")
+                    params = []
+                    for predecessor in step.predecessors:
+                        if predecessor.out_to_run_degree > 1:
+                            if predecessor in intermediate_results:
+                                params.append(
+                                    copy.deepcopy(intermediate_results[predecessor])
+                                )
+                            else:
+                                params.append(PipelineMixin.StepSkipped)
+                        else:
+                            params.append(
+                                intermediate_results.get(
+                                    predecessor, PipelineMixin.StepSkipped
+                                )
+                            )
+                    intermediate_results[step] = step(*params)
+                if step.out_to_run_degree == 0:
+                    output.append(intermediate_results[step])
+            else:
+                logger.info(f"Skipping {step}")
+                intermediate_results[step] = PipelineMixin.StepSkipped
+
+        return output[0] if len(output) == 1 else tuple(output)
+
+    def process(
+        self,
+        dataset: Dataset,
+        desc: Optional[str] = None,
+        truncation: bool = True,
+        **process_kwargs,
+    ) -> Dataset:
+        if process_kwargs.get("sample_dialogue", False):
+            raise NotImplementedError(
+                "Sampling from dialogue is not implemented for T5DST"
+            )
+        return super().process(
+            dataset, desc=desc, truncation=truncation, **process_kwargs
+        )
 
 class D3STPreprocessor(Preprocessor):
     class AugmentStyle:

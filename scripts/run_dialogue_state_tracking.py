@@ -53,8 +53,8 @@ from robust_dst.cli import (
     ModelArguments,
 )
 from robust_dst.evaluation import get_metrics
-from robust_dst.parser import D3STParser, T5DSTParser
-from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor
+from robust_dst.parser import D3STParser, T5DSTParser, SDTParser
+from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor, SDTPreprocessor
 from robust_dst.scoring_utils import (
     flatten_metrics_dict,
     setup_evaluator_output_dirs,
@@ -399,6 +399,10 @@ def main():
             domain_in_desc=domain_in_desc,
             **preprocessor_init_kwargs,
         )
+    elif "sdt" in data_format:
+        preprocessor = SDTPreprocessor(
+            **preprocessor_init_kwargs,
+        )
     else:
         preprocessor = T5DSTPreprocessor(
             **preprocessor_init_kwargs,
@@ -420,6 +424,7 @@ def main():
                 train_dataset,
                 desc="Running tokenizer on train dataset",
                 augment_style=data_args.augment_style,
+                truncation=False,
                 omit_confirmation_turns=data_args.omit_confirmation_turns,
                 discard_truncated_examples=data_args.discard_truncated_examples,
             )
@@ -442,6 +447,7 @@ def main():
         ):
             eval_dataset = preprocessor.process(
                 eval_dataset,
+                truncation=False,
                 desc="Running tokenizer on validation dataset",
             )
         parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
@@ -554,6 +560,10 @@ def main():
             restore_categorical_case=parser_inputs["preproc_config"]["lowercase"],
             **parser_init_kwargs,
         )
+    elif "sdt" in data_format:
+        parser = SDTParser(
+            data_format=data_format,
+            **parser_init_kwargs)
     else:
         parser = T5DSTParser(
             data_format=data_format,

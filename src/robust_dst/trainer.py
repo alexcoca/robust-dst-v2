@@ -107,6 +107,9 @@ class CustomTrainer(Seq2SeqTrainer):
         hyps_dir, metrics_dir = setup_evaluator_output_dirs(
             self.args, "dev", current_step
         )
+        if self.compute_metrics is None: # No point in doing the following
+            return output.metrics
+        
         outputs_to_save = (
             output.metrics.pop(f"{metric_key_prefix}_all_metrics_aggregate"),
             output.metrics.pop(f"{metric_key_prefix}_file_to_hyp_dials"),
@@ -245,6 +248,14 @@ class CustomTrainer(Seq2SeqTrainer):
         )
 
     def log_config_to_wandb(self, config: dict):
+        if not isinstance(config, dict):
+            logger.warning("Config is not a dict, so not logging to wandb!")
+            try:
+                str_representation = f"{config}"
+                logger.warning(f"Here is the config: \n{str_representation}")
+            except Exception:
+                logger.warning(f"Could not convert config to string!. It is a type: {type(config)}")
+            return
         if self.state.is_world_process_zero:
             for c in self.callback_handler.callbacks:
                 if isinstance(c, CustomWandbCallback):
