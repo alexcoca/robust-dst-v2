@@ -755,23 +755,11 @@ def main():
             if training_args.predict_with_generate:
                 checkpoint_dir = output_dir_pth
                 step = int(checkpoint_dir.name.split("-")[1])
-                hyp_dir, metrics_dir = setup_evaluator_output_dirs(
+                hyp_dir, _ = setup_evaluator_output_dirs(
                     training_args, "test", step
                 )
-                model_config = OmegaConf.create(
-                    {
-                        "data": preprocessing_configs,
-                        "train_arguments": {
-                            k: v
-                            for k, v in training_args.__dict__.items()
-                            if not k.startswith("__")
-                        },
-                        "data_args": data_args.__dict__,
-                        "model_args": model_args.__dict__,
-                    }
-                )
-                OmegaConf.save(
-                    config=model_config, f=hyp_dir.joinpath("experiment_config.yaml")
+                create_and_save_model_config(
+                    hyp_dir.joinpath("experiment_config.yaml")
                 )
 
     kwargs = {
