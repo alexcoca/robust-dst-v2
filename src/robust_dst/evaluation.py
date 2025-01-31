@@ -159,6 +159,8 @@ def get_metrics(
                                           metrics.CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY: consistency_adjusted_jga}
                     per_intent_metrics[intent_id] = update_intent_dict
                     frame_metric.update(update_intent_dict)
+                    frame_metric[f'{service_name}/{intent}/{metrics.CORRECT_TURNS}'] = correct_turns
+                    frame_metric[f'{service_name}/{intent}/{metrics.CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY}'] = consistency_adjusted_jga
                 # Code for computing consistency adjusted JGA ends
 
                 frame_id = "{:s}-{:03d}-{:s}".format(
