@@ -154,7 +154,7 @@ def get_metrics(
                             correct_turns = prev_correct_turns
                         else: # was correct
                             consistency_adjusted_jga = thresholded_jga
-                            correct_turns = prev_correct_turns + 2
+                            correct_turns = prev_correct_turns + 2 if intent_correct else prev_correct_turns
                     update_intent_dict = {metrics.CORRECT_TURNS: correct_turns,
                                           metrics.CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY: consistency_adjusted_jga}
                     per_intent_metrics[intent_id] = update_intent_dict
