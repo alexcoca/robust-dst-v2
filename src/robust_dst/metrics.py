@@ -67,6 +67,10 @@ AVERAGE_NONCAT_ACCURACY = "average_noncat_accuracy"
 JOINT_GOAL_ACCURACY = "joint_goal_accuracy"
 JOINT_CAT_ACCURACY = "joint_cat_accuracy"
 JOINT_NONCAT_ACCURACY = "joint_noncat_accuracy"
+# (6) Consitency adjusted Joint goal accuracy.
+CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY = "consistency_adjusted_joint_goal_accuracy"
+# (7) Correct Turns
+CORRECT_TURNS = "correct_turns"
 
 NAN_VAL = "NA"
 
