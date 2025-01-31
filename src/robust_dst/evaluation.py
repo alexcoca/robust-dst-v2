@@ -4,6 +4,7 @@ import numpy as np
 from absl import logging
 
 from robust_dst import metrics
+from robust_dst.utils import linear_thresholding
 
 ALL_SERVICES = "#ALL_SERVICES"
 SEEN_SERVICES = "#SEEN_SERVICES"
@@ -18,6 +19,7 @@ def get_metrics(
     in_domain_services,
     use_fuzzy_match=True,
     joint_acc_across_turn=False,
+    fuzzy_threshold=0.8
 ):
     """Calculate the DSTC8 metrics.
     Args:
@@ -50,6 +52,8 @@ def get_metrics(
 
     # Store metrics for every frame for debugging.
     per_frame_metric = {}
+    # Store metrics for every intent in each dialogue for internal use
+    per_intent_metrics = {}
     for dial_id, dial_hyp in dataset_hyp.items():
         dial_ref = dataset_ref[dial_id]
 
@@ -92,6 +96,7 @@ def get_metrics(
             # Calculate metrics for each frame in each user turn.
             for frame_ref in turn_ref["frames"]:
                 service_name = frame_ref["service"]
+                intent = frame_ref['state']['active_intent']
                 if service_name not in hyp_frames_by_service:
                     raise ValueError(
                         "Frame for service {} not found in dialogue with id {}".format(
@@ -129,6 +134,32 @@ def get_metrics(
                         metrics.SLOT_TAGGING_RECALL
                     ] = slot_tagging_f1_scores.recall
                 frame_metric.update(goal_accuracy_dict)
+
+                if intent != "NONE": # ignore None intents for the following calculations
+                    thresholded_jga = linear_thresholding(goal_accuracy_dict[metrics.JOINT_GOAL_ACCURACY],
+                                                          fuzzy_threshold)
+                    intent_correct = thresholded_jga > 0
+                    intent_id = f"{dial_id}-{intent}"
+                    if intent_id not in per_intent_metrics: # new intent introduced for this dialogue
+                        consistency_adjusted_jga = thresholded_jga
+                        correct_turns = 1 if intent_correct else 0
+                    else: # intent from previous turns in this dialogue
+                        intent_dict = per_intent_metrics[intent_id]
+                        prev_consistency_adjusted_jga = intent_dict[metrics.CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY]
+                        prev_correct_turns = intent_dict[metrics.CORRECT_TURNS]
+                        if prev_consistency_adjusted_jga == 0.0: #   wrong in the past, keep it wrong
+                            if thresholded_jga > 0.0:
+                                logging.info(f"Recovery has been made in {intent_id} in turn {turn_id}")
+                            consistency_adjusted_jga = 0
+                            correct_turns = prev_correct_turns
+                        else: # was correct
+                            consistency_adjusted_jga = thresholded_jga
+                            correct_turns = prev_correct_turns + 2
+                    update_intent_dict = {metrics.CORRECT_TURNS: correct_turns,
+                                          metrics.CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY: consistency_adjusted_jga}
+                    per_intent_metrics[intent_id] = update_intent_dict
+                    frame_metric.update(update_intent_dict)
+                # Code for computing consistency adjusted JGA ends
 
                 frame_id = "{:s}-{:03d}-{:s}".format(
                     dial_id, turn_id, frame_hyp["service"]
