@@ -492,8 +492,9 @@ def main():
                 desc="Running tokenizer on prediction dataset",
                 iterative_decoding=data_args.iterative_decoding,
             )
+        split = "validation" if training_args.offline_dev_eval else "test"
         parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
-            data_args, preprocessing_configs, raw_preprocessed_refs, "test"
+            data_args, preprocessing_configs, raw_preprocessed_refs, split
         )
 
     # Optimizer and scheduler

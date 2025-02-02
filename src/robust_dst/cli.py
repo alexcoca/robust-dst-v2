@@ -576,6 +576,12 @@ class CustomSeq2SeqTrainingArguments(Seq2SeqTrainingArguments):
             "help": "Set tags for a ``wandb`` run to simplify data analysis.",
         },
     )
+    offline_dev_eval: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": "Set this to true to run development set inference offline"
+        }
+    )
 
     def __post_init__(self):
         logging.info("Running sanity checks on arguments")
