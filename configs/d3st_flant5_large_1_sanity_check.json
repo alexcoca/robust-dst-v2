@@ -34,7 +34,7 @@
   "metric_for_best_model": "#UNSEEN_SERVICES/joint_goal_accuracy",
   "wandb_entity": "best-research",
   "wandb_project": "pytod",
-  "seed": 2,
+  "seed": 20230110,
   "num_train_epochs": 10,
   "max_target_length": 512,
   "val_max_target_length": 512,
