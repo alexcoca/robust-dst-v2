@@ -1,0 +1,2 @@
+CONFIG_FILE=d3st_flant5_large_2_sanity_check.json sbatch train_d3st.sh
+
