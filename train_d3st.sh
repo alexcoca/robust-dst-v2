@@ -3,7 +3,7 @@
 #SBATCH -J D3ST-TRAIN
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 #SBATCH --time=30:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ac2123@cam.ac.uk
