@@ -646,7 +646,8 @@ def main():
         callbacks = [CacheManagerCallback, early_stopping_callback, CustomWandbCallback]
     else:
         callbacks = [CacheManagerCallback, early_stopping_callback]
-
+    if not training_args.predict_with_generate:
+        callbacks.remove(early_stopping_callback)
     if training_args.generation_max_length is None:
         training_args.generation_max_length = data_args.val_max_target_length
     if training_args.generation_num_beams is None:
