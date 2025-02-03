@@ -31,7 +31,7 @@
   "eval_steps": 2500,
   "save_steps": 1600,
   "early_stopping_patience": 6,
-  "load_best_model_at_end": true,
+  "load_best_model_at_end": false,
   "report_to": "wandb",
   "wandb_entity": "best-research",
   "wandb_project": "pytod",
