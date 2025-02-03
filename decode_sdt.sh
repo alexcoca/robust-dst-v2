@@ -20,8 +20,9 @@ module load rhel8/default-amp
 export OMP_NUM_THREADS=1
 
 module load slurm
-module load anaconda/3.2019-10
 eval "$(conda shell.bash hook)"
+conda deactivate
+conda info --envs
 conda activate robust-dst
 
 if [ -z ${EXPERIMENT_NAME+x} ]; then
@@ -55,7 +56,7 @@ PROC_NUM_WORK=128
 INFERENCE_BATCH_SIZE=128
 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/${EXPERIMENT_NAME}/version_1/checkpoint-${ckpt}
 
-python -m scripts.inference \
+python -m scripts.sdt_inference \
   --model_name_or_path $CHECKPOINT_DIR \
   --output_dir $CHECKPOINT_DIR \
   --test_file data/processed/original/"${SPLIT}"/version_$VERSION/data.json \
