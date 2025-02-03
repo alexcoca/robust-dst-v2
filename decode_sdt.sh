@@ -48,8 +48,8 @@ fi
 
 ckpt=${CHECKPOINTS[$SLURM_ARRAY_TASK_ID]}
 
-LOG=logs/"$SLURM_JOB_ID"_replicate_d3st_${SPLIT}_${ckpt}.log
-ERR=logs/"$SLURM_JOB_ID"_replicate_d3st_${SPLIT}_${ckpt}.err
+LOG=logs/"$SLURM_JOB_ID"_"$SLURM_ARRAY_TASK_ID"_replicate_d3st_${SPLIT}_${ckpt}.log
+ERR=logs/"$SLURM_JOB_ID"_"$SLURM_ARRAY_TASK_ID"_replicate_d3st_${SPLIT}_${ckpt}.err
 
 VERSION=1
 PROC_NUM_WORK=128
