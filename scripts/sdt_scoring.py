@@ -140,6 +140,7 @@ def main(
     with open(output_file, "w") as f:
         json.dump(all_metrics_aggregate, f, indent=4)
     if save_files:
+        hyp_dir = Path(hyp_dir)
         for fname, this_file_dials in file_to_hyp_dials.items():
             current_step_sgd_format_predictions_pth = hyp_dir.joinpath(fname)
             logger.info(
