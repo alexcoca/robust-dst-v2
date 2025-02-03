@@ -5,8 +5,10 @@
   "train_file": [
     "data/processed/SGD_SDT/v0/train/version_1/data.json"
   ],
-  "validation_file": "data/processed/SGD_SDT/v0/dev/version_1/data.json",
   "test_file": "data/processed/SGD_SDT/v0/test/version_1/data.json",
+  "test_ref_dir": "data/raw/original/test",
+  "test_template_dir": "data/interim/blank_dialogue_templates/original/test",
+  "validation_file": "data/processed/SGD_SDT/v0/dev/version_1/data.json",
   "validation_ref_dir": "data/raw/original/dev",
   "validation_template_dir": "data/interim/blank_dialogue_templates/original/dev",
   "preprocessing_num_workers": 128,
