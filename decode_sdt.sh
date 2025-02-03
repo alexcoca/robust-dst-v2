@@ -34,7 +34,7 @@ if [ -z ${SPLIT+x} ]; then
 fi
 if [ -z ${CHECKPOINTS+x} ]; then
   CHECKPOINTS=(
-    $(seq 1600 1600 50000)
+    $(seq 1600 1600 55000)
   )
 else
   IFS=',' read -r -a CHECKPOINTS <<< "$CHECKPOINTS"
