@@ -39,6 +39,8 @@ logger = logging.getLogger(__name__)
 @click.option("--data_format", default="google")
 @click.option("--output_file", required=False, type=click.Path(exists=False))
 @click.option("--output_file_name", default="metrics.json", required=False)
+@click.option("--save_files", default=False, required=False)
+@click.option("--hyp_dir", default=click.Path(exists=True), required=False)
 def main(
     initialisation_file_path,
     data_type,
@@ -47,6 +49,8 @@ def main(
     data_format,
     output_file,
     output_file_name,
+    save_files,
+    hyp_dir,
 ):
     arg_parser = HfArgumentParser(
         (ModelArguments, DataTrainingArguments, CustomSeq2SeqTrainingArguments)
@@ -135,6 +139,15 @@ def main(
         output_file = Path(predictions_file).parent.joinpath(output_file_name)
     with open(output_file, "w") as f:
         json.dump(all_metrics_aggregate, f, indent=4)
+    if save_files:
+        for fname, this_file_dials in file_to_hyp_dials.items():
+            current_step_sgd_format_predictions_pth = hyp_dir.joinpath(fname)
+            logger.info(
+                "Saving formatted predictions at"
+                f" {current_step_sgd_format_predictions_pth}"
+            )
+            with open(current_step_sgd_format_predictions_pth, "w") as f:
+                json.dump(this_file_dials, f, indent=2)
 
 
 if __name__ == "__main__":
