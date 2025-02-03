@@ -60,6 +60,5 @@ python -m scripts.sdt_inference \
   --model_name_or_path $CHECKPOINT_DIR \
   --output_dir $CHECKPOINT_DIR \
   --test_file data/processed/original/"${SPLIT}"/version_$VERSION/data.json \
-  --preprocessing_num_workers $PROC_NUM_WORK \
   --start_batch_size $INFERENCE_BATCH_SIZE \
   --max_target_length 512 > $LOG 2> $ERR
