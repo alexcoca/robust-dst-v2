@@ -245,3 +245,7 @@ def main(
     with open(output_file, "w") as f:
         f.write("\n".join(reordered_outputs))
     logger.info(f"Predictions saved at {output_file}")
+
+
+if __name__ == '__main__':
+    main()
