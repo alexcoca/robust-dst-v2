@@ -29,6 +29,10 @@ if [ -z ${EXPERIMENT_NAME+x} ]; then
   echo "Please prepend the experiment name eg EXPERIMENT_NAME=cool_experiment."
   exit
 fi
+if [ -z ${PROMPT_ID+x} ]; then
+  echo "Please specify the prompt index: PROMPT_ID=(v0|v1|v2|v3|v4)"
+  exit
+fi
 if [ -z ${SPLIT+x} ]; then
   echo "Please specify the split: dev|test"
   exit
@@ -59,6 +63,6 @@ CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/${
 python -m scripts.sdt_inference \
   --model_name_or_path $CHECKPOINT_DIR \
   --output_dir $CHECKPOINT_DIR \
-  --test_file data/processed/original/"${SPLIT}"/version_$VERSION/data.json \
+  --test_file data/processed/SGD_SDT/"${PROMPT_ID}"/"${SPLIT}"/version_$VERSION/data.json \
   --start_batch_size $INFERENCE_BATCH_SIZE \
   --max_target_length 512 > $LOG 2> $ERR
