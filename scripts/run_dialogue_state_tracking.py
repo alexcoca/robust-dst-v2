@@ -498,8 +498,9 @@ def main():
                 desc="Running tokenizer on prediction dataset",
                 iterative_decoding=data_args.iterative_decoding,
             )
+        split = "validation" if training_args.offline_dev_eval else "test"
         parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
-            data_args, preprocessing_configs, raw_preprocessed_refs, "test"
+            data_args, preprocessing_configs, raw_preprocessed_refs, split
         )
 
     # Optimizer and scheduler
@@ -655,7 +656,8 @@ def main():
         callbacks = [CacheManagerCallback, early_stopping_callback, CustomWandbCallback]
     else:
         callbacks = [CacheManagerCallback, early_stopping_callback]
-
+    if not training_args.predict_with_generate:
+        callbacks.remove(early_stopping_callback)
     if training_args.generation_max_length is None:
         training_args.generation_max_length = data_args.val_max_target_length
     if training_args.generation_num_beams is None:
@@ -765,23 +767,11 @@ def main():
             if training_args.predict_with_generate:
                 checkpoint_dir = output_dir_pth
                 step = int(checkpoint_dir.name.split("-")[1])
-                hyp_dir, metrics_dir = setup_evaluator_output_dirs(
+                hyp_dir, _ = setup_evaluator_output_dirs(
                     training_args, "test", step
                 )
-                model_config = OmegaConf.create(
-                    {
-                        "data": preprocessing_configs,
-                        "train_arguments": {
-                            k: v
-                            for k, v in training_args.__dict__.items()
-                            if not k.startswith("__")
-                        },
-                        "data_args": data_args.__dict__,
-                        "model_args": model_args.__dict__,
-                    }
-                )
-                OmegaConf.save(
-                    config=model_config, f=hyp_dir.joinpath("experiment_config.yaml")
+                create_and_save_model_config(
+                    hyp_dir.joinpath("experiment_config.yaml")
                 )
 
     kwargs = {

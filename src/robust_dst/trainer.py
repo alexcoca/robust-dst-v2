@@ -104,18 +104,16 @@ class CustomTrainer(Seq2SeqTrainer):
 
         # save evaluation artefacts
         current_step = self.state.global_step
-        hyps_dir, metrics_dir = setup_evaluator_output_dirs(
-            self.args, "dev", current_step
-        )
-        if self.compute_metrics is None: # No point in doing the following
-            return output.metrics
-        
-        outputs_to_save = (
-            output.metrics.pop(f"{metric_key_prefix}_all_metrics_aggregate"),
-            output.metrics.pop(f"{metric_key_prefix}_file_to_hyp_dials"),
-            output.metrics.pop(f"{metric_key_prefix}_raw_predictions"),
-        )
-        save_evaluator_outputs(hyps_dir, metrics_dir, *outputs_to_save, current_step)
+        if self.args.predict_with_generate:
+            hyps_dir, metrics_dir = setup_evaluator_output_dirs(
+                self.args, "dev", current_step
+            )
+            outputs_to_save = (
+                output.metrics.pop(f"{metric_key_prefix}_all_metrics_aggregate"),
+                output.metrics.pop(f"{metric_key_prefix}_file_to_hyp_dials"),
+                output.metrics.pop(f"{metric_key_prefix}_raw_predictions"),
+            )
+            save_evaluator_outputs(hyps_dir, metrics_dir, *outputs_to_save, current_step)
         total_batch_size = self.args.eval_batch_size * self.args.world_size
         output.metrics.update(
             speed_metrics(
