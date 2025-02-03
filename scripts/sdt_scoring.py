@@ -69,14 +69,12 @@ def main(
     if data_args.validation_file is not None:
         data_files["validation"] = data_args.validation_file
         extension = data_args.validation_file.split(".")[-1]
-        data_version = infer_data_version_from_path(data_args.validation_file)
         preprocessing_configs["validation"] = OmegaConf.load(
             Path(data_args.validation_file).parent.joinpath("preprocessing_config.yaml")
         )
     if data_args.test_file is not None:
         data_files["test"] = data_args.test_file
         extension = data_args.test_file.split(".")[-1]
-        data_version = infer_data_version_from_path(data_args.test_file)
         preprocessing_configs["test"] = OmegaConf.load(
             Path(data_args.test_file).parent.joinpath("preprocessing_config.yaml")
         )
