@@ -6,7 +6,7 @@
     "data/processed/SGD_SDT/v0/train/version_1/data.json"
   ],
   "validation_file": "data/processed/SGD_SDT/v0/dev/version_1/data.json",
-  "resume_from_checkpoint": "/scratches/neuron/dev/robust-dst-v2/models/seed_420_replicate_sdt_v0/version_1/checkpoint-40000",
+  "resume_from_checkpoint": "/scratches/neuron/dev/robust-dst-v2/models/seed_420_replicate_sdt_v0/version_1/checkpoint-38400",
   "output_dir": "/scratches/neuron/dev/robust-dst-v2/models/seed_420_replicate_sdt_v0/version_1",
   "test_file": "data/processed/SGD_SDT/v0/test/version_1/data.json",
   "validation_ref_dir": "data/raw/original/dev",
