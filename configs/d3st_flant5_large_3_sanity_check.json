@@ -38,5 +38,6 @@
   "max_target_length": 512,
   "val_max_target_length": 512,
   "ensure_determinism": true,
-  "overwrite_cache": true
+  "overwrite_cache": true,
+  "metric_for_best_model": null
 }

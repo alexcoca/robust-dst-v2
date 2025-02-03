@@ -43,6 +43,7 @@
   "max_source_length": 2048,
   "max_target_length": 512,
   "val_max_target_length": 512,
+  "metric_for_best_model": null,
   "ensure_determinism": true,
   "overwrite_cache": true,
   "source_column": "source",
