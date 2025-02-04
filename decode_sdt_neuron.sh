@@ -42,8 +42,8 @@ for ckpt in "${CHECKPOINTS[@]}"; do
     echo "Running inference for checkpoint: $ckpt" | tee -a "$file_name"
 
     python -m scripts.sdt_inference \
-      --model_name_or_path $CHECKPOINT_DIR \
-      --output_dir $CHECKPOINT_DIR \
+      --model_name_or_path "$CHECKPOINT_DIR" \
+      --output_dir "$CHECKPOINT_DIR" \
       --test_file data/processed/SGD_SDT/"${PROMPT_ID}"/"${SPLIT}"/version_$VERSION/data.json \
       --start_batch_size $INFERENCE_BATCH_SIZE \
       --max_target_length 512 > $LOG 2> $ERR
