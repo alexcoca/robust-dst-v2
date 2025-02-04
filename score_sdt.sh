@@ -52,6 +52,7 @@ for ckpt in "${CHECKPOINTS[@]}"; do
         --demonstration_id "${PROMPT_ID}" \
         --predictions_file "${PREDICTION_FILE_PATH}" \
         --refs_file "${REFS_FILE_PATH}" \
+        --data_type "${SPLIT}" \
         --output_file "${OUT_FILE}"
 
     if [ $? -eq 0 ]; then
