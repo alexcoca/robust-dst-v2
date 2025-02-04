@@ -1,25 +1,16 @@
-# Work by Ankit Bhattarai as part of Conversational AI Development project
+# Work by Ankit Bhattarai as part of Conversational AI Development project, modified by Alex Coca
 import json
 import logging
 from itertools import chain
 from pathlib import Path
+from types import SimpleNamespace
 
 import click
 from datasets import load_dataset
 from omegaconf import OmegaConf
-from transformers import HfArgumentParser
-
-from robust_dst.cli import (
-    CustomSeq2SeqTrainingArguments,
-    DataTrainingArguments,
-    ModelArguments,
-)
 from robust_dst.evaluation import get_metrics
 from robust_dst.parser import SDTParser
 from robust_dst.scoring_utils import flatten_metrics_dict, setup_sgd_evaluation
-from robust_dst.utils import (
-    infer_data_version_from_path,
-)
 
 logging.basicConfig(
     level=logging.WARNING, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -29,9 +20,9 @@ logger = logging.getLogger(__name__)
 
 @click.command()
 @click.option(
-    "--initialisation_file_path",
-    type=click.Path(exists=True),
-    default="configs/train_sdt_baseline_cpu_debug.json",
+    "--demonstration_id",
+    type=click.Choice(["v0", "v1", "v2", "v3", "v4"]),
+    default=None,
 )
 @click.option("--data_type", type=click.Choice(["dev", "test"]), default="dev")
 @click.option("--predictions_file", type=click.Path(exists=True))
@@ -41,8 +32,10 @@ logger = logging.getLogger(__name__)
 @click.option("--output_file_name", default="metrics.json", required=False)
 @click.option("--save_files", default=False, required=False)
 @click.option("--hyp_dir", type=click.Path(exists=True), required=False)
+@click.option("--max_samples", default=None, required=False)
+@click.option("--version", default=1, required=False)
 def main(
-    initialisation_file_path,
+    demonstration_id,
     data_type,
     predictions_file,
     refs_file,
@@ -51,40 +44,46 @@ def main(
     output_file_name,
     save_files,
     hyp_dir,
+    max_samples,
+    version,
 ):
-    arg_parser = HfArgumentParser(
-        (ModelArguments, DataTrainingArguments, CustomSeq2SeqTrainingArguments)
-    )
+    data_args = SimpleNamespace(
+        max_eval_samples=max_samples,
+        max_predict_samples=max_samples,
+        validation_file=f"data/processed/SGD_SDT/{demonstration_id}/dev/version_{version}/data.json",
+        test_file=f"data/processed/SGD_SDT/{demonstration_id}/test/version_{version}/data.json",
+        validation_ref_dir="data/raw/original/dev",
+        test_ref_dir="data/raw/original/test",
+        validation_template_dir="data/interim/blank_dialogue_templates/original/dev",
+        test_template_dir="data/interim/blank_dialogue_templates/original/test",
 
-    model_args, data_args, training_args = arg_parser.parse_json_file(
-        json_file=initialisation_file_path
     )
     preprocessing_configs = {}  # type: dict[str, DictConfig]
     data_files = {}  # type: dict[str, str]
     extension = "json"
-
+    val_file, test_file = data_args.validation_file, data_args.test_file
     preprocessing_configs["validation"] = OmegaConf.load(
-        Path(data_args.validation_file).parent.joinpath("preprocessing_config.yaml")
+        Path(val_file).parent.joinpath("preprocessing_config.yaml")
     )
     preprocessing_configs["test"] = OmegaConf.load(
-        Path(data_args.test_file).parent.joinpath("preprocessing_config.yaml")
+        Path(test_file).parent.joinpath("preprocessing_config.yaml")
     )
 
-    if data_args.validation_file is not None:
-        data_files["validation"] = data_args.validation_file
-        extension = data_args.validation_file.split(".")[-1]
+    if val_file is not None:
+        data_files["validation"] = val_file
+        extension = val_file.split(".")[-1]
         preprocessing_configs["validation"] = OmegaConf.load(
-            Path(data_args.validation_file).parent.joinpath("preprocessing_config.yaml")
+            Path(val_file).parent.joinpath("preprocessing_config.yaml")
         )
-    if data_args.test_file is not None:
-        data_files["test"] = data_args.test_file
-        extension = data_args.test_file.split(".")[-1]
+    if test_file is not None:
+        data_files["test"] = test_file
+        extension = test_file.split(".")[-1]
         preprocessing_configs["test"] = OmegaConf.load(
-            Path(data_args.test_file).parent.joinpath("preprocessing_config.yaml")
+            Path(test_file).parent.joinpath("preprocessing_config.yaml")
         )
 
     raw_datasets = load_dataset(
-        extension, data_files=data_files, cache_dir=model_args.cache_dir, field="data"
+        extension, data_files=data_files, cache_dir="cache", field="data"
     )
 
     raw_preprocessed_refs = {}  # type: dict[str, list[dict]]
@@ -92,15 +91,14 @@ def main(
         if split == "train":
             continue
         raw_preprocessed_refs[split] = raw_datasets.data[split].table.to_pylist()
-        if split == "test" and data_args.max_predict_samples is not None:
+        if split == "test" and max_samples is not None:
             raw_preprocessed_refs[split] = raw_preprocessed_refs[split][
-                : data_args.max_predict_samples
+                : max_samples
             ]
-        if split == "validation" and data_args.max_eval_samples is not None:
+        if split == "validation" and max_samples is not None:
             raw_preprocessed_refs[split] = raw_preprocessed_refs[split][
-                : data_args.max_eval_samples
+                : max_samples
             ]
-
     input_dtype = "validation" if data_type == "dev" else data_type
     parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
         data_args, preprocessing_configs, raw_preprocessed_refs, input_dtype

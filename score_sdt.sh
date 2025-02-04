@@ -39,7 +39,6 @@ echo "$(date +'%Y-%m-%d %H:%M:%S') - Running scoring for $EXPERIMENT_NAME - Spli
 # Loop through all checkpoints
 for ckpt in "${CHECKPOINTS[@]}"; do
     PREDICTION_FILE_PATH="${PREFIX}/models/${EXPERIMENT_NAME}/version_1/checkpoint-${ckpt}/generated_predictions.txt"
-    CONFIG_FILE_PATH="${PREFIX}/configs/replicate_sdt_${PROMPT_ID}.json"
     REFS_FILE_PATH="${PREFIX}/data/processed/SGD_SDT/${PROMPT_ID}/${SPLIT}/version_${VERSION}/data.json"
     OUT_DIR="${PREFIX}/metrics/${EXPERIMENT_NAME}/original/${SPLIT}/version_${VERSION}"
     HYP_DIR="${PREFIX}/hyps/${EXPERIMENT_NAME}/original/${SPLIT}/version_${VERSION}"
@@ -50,7 +49,7 @@ for ckpt in "${CHECKPOINTS[@]}"; do
     echo "Scoring checkpoint: $ckpt" | tee -a "$LOG_FILE"
 
     python scripts/sdt_scoring.py \
-        --initialisation_file_path "${CONFIG_FILE_PATH}" \
+        --demonstration_id "${PROMPT_ID}" \
         --predictions_file "${PREDICTION_FILE_PATH}" \
         --refs_file "${REFS_FILE_PATH}" \
         --output_file "${OUT_FILE}"
