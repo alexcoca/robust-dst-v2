@@ -1,4 +1,5 @@
 #!/bin/bash
+eval "$(conda shell.bash hook)"
 conda deactivate
 conda activate robust-dst
 # Check required environment variables
