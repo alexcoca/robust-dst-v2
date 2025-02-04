@@ -25,6 +25,7 @@ if [ "$SPLIT" == "test" ] && [ -z ${CHECKPOINTS+x} ]; then
 fi
 
 INFERENCE_BATCH_SIZE=64
+PREFIX=/scratches/neuron/dev/robust-dst-v2/models
 file_name="decoding_status-$EXPERIMENT_NAME-$EXP_NAME_SUFFIX-$SPLIT-$VERSION.txt"
 
 if [ ! -f "$file_name" ]; then
