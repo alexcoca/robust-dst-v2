@@ -1,5 +1,6 @@
 #!/bin/bash
-
+conda deactivate
+conda activate robust-dst
 # Check required environment variables
 if [ -z ${EXPERIMENT_NAME+x} ]; then
   echo "Please set EXPERIMENT_NAME."
