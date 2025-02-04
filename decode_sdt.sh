@@ -51,14 +51,14 @@ fi
 
 
 ckpt=${CHECKPOINTS[$SLURM_ARRAY_TASK_ID]}
+mkdir -p logs/"${EXPERIMENT_NAME}"
+LOG=logs/${EXPERIMENT_NAME}/${ckpt}.log
+ERR=logs/${EXPERIMENT_NAME}/${ckpt}.err
 
-LOG=logs/"$SLURM_JOB_ID"_"$SLURM_ARRAY_TASK_ID"_replicate_d3st_${SPLIT}_${ckpt}.log
-ERR=logs/"$SLURM_JOB_ID"_"$SLURM_ARRAY_TASK_ID"_replicate_d3st_${SPLIT}_${ckpt}.err
-
+PREFIX=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models
 VERSION=1
-PROC_NUM_WORK=128
 INFERENCE_BATCH_SIZE=128
-CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/${EXPERIMENT_NAME}/version_1/checkpoint-${ckpt}
+CHECKPOINT_DIR=${PREFIX}/${EXPERIMENT_NAME}/version_1/checkpoint-${ckpt}
 
 python -m scripts.sdt_inference \
   --model_name_or_path $CHECKPOINT_DIR \
