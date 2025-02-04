@@ -189,6 +189,7 @@ def setup_sgd_evaluation(
             data_args.max_predict_samples is not None,
         )
     ):
+        assert False, "Should not traverse this code path"
         files_decoded = get_dialogue_filenames(raw_preprocessed_refs[split])
         dialogues_decoded = get_dialogue_ids(raw_preprocessed_refs[split])
     schema_path = Path(getattr(data_args, f"{split}_ref_dir")).joinpath("schema.json")
