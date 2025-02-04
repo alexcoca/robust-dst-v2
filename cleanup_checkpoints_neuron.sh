@@ -15,7 +15,7 @@ fi
 IFS=',' read -r -a KEEP_ARRAY <<< "$KEEP_CHECKPOINTS"
 
 # Define the checkpoint directory
-PREFIX="/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models"
+PREFIX="/scratch/dev/robust-dst-v2/models"
 CHECKPOINT_DIR="${PREFIX}/${EXPERIMENT_NAME}/version_1"
 
 # Verify if the directory exists
