@@ -1,4 +1,8 @@
 #!/bin/bash
+eval "$(conda shell.bash hook)"
+conda deactivate
+conda info --envs
+conda activate robust-dst
 
 if [ -z ${EXPERIMENT_NAME+x} ]; then
   echo "Please prepend the experiment name eg EXPERIMENT_NAME=cool_experiment."
