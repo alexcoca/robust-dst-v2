@@ -24,9 +24,9 @@ if [ "$SPLIT" == "test" ] && [ -z ${CHECKPOINTS+x} ]; then
   exit 1
 fi
 
-INFERENCE_BATCH_SIZE=64
+INFERENCE_BATCH_SIZE=128
 VERSION=1
-PREFIX=/scratch/dev/robust-dst-v2/models
+PREFIX=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models
 file_name="decoding_status-$EXPERIMENT_NAME-$EXP_NAME_SUFFIX-$SPLIT-$VERSION.txt"
 
 if [ ! -f "$file_name" ]; then
