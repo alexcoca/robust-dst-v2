@@ -126,7 +126,7 @@ def main(
         dial["dialogue_id"]: dial for dial in chain(*file_to_hyp_dials.values())
     }
 
-    all_metrics_aggregate, _ = get_metrics(
+    all_metrics_aggregate, frame_metrics = get_metrics(
         dataset_ref=sgd_evaluator_inputs["dataset_ref"],
         dataset_hyp=dataset_hyp,
         service_schemas=sgd_evaluator_inputs["eval_services"],
@@ -139,15 +139,16 @@ def main(
         json.dump(all_metrics_aggregate, f, indent=4)
     if save_files:
         hyp_dir = Path(hyp_dir)
-        for fname, this_file_dials in file_to_hyp_dials.items():
-            current_step_sgd_format_predictions_pth = hyp_dir.joinpath(fname)
-            logger.info(
-                "Saving formatted predictions at"
-                f" {current_step_sgd_format_predictions_pth}"
-            )
-            with open(current_step_sgd_format_predictions_pth, "w") as f:
-                json.dump(this_file_dials, f, indent=2)
-
+        # for fname, this_file_dials in file_to_hyp_dials.items():
+        #     current_step_sgd_format_predictions_pth = hyp_dir.joinpath(fname)
+        #     logger.info(
+        #         "Saving formatted predictions at"
+        #         f" {current_step_sgd_format_predictions_pth}"
+        #     )
+        #     with open(current_step_sgd_format_predictions_pth, "w") as f:
+        #         json.dump(this_file_dials, f, indent=2)
+        with open(hyp_dir.joinpath("metrics_and_dialogues.json")) as f:
+            json.dump(frame_metrics, f, indent=2)
 
 if __name__ == "__main__":
     main()
