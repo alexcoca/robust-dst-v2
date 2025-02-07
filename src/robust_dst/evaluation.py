@@ -4,6 +4,7 @@ import numpy as np
 from absl import logging
 
 from robust_dst import metrics
+from robust_dst.utils import linear_thresholding
 
 ALL_SERVICES = "#ALL_SERVICES"
 SEEN_SERVICES = "#SEEN_SERVICES"
@@ -18,6 +19,7 @@ def get_metrics(
     in_domain_services,
     use_fuzzy_match=True,
     joint_acc_across_turn=False,
+    fuzzy_threshold=0.8
 ):
     """Calculate the DSTC8 metrics.
     Args:
@@ -50,6 +52,10 @@ def get_metrics(
 
     # Store metrics for every frame for debugging.
     per_frame_metric = {}
+    # Store metrics for every intent in each dialogue for internal use
+    per_intent_metrics = {}
+    # Store the past intent for each dialogue
+    past_intents = {}
     for dial_id, dial_hyp in dataset_hyp.items():
         dial_ref = dataset_ref[dial_id]
 
@@ -92,6 +98,7 @@ def get_metrics(
             # Calculate metrics for each frame in each user turn.
             for frame_ref in turn_ref["frames"]:
                 service_name = frame_ref["service"]
+                intent = frame_ref['state']['active_intent']
                 if service_name not in hyp_frames_by_service:
                     raise ValueError(
                         "Frame for service {} not found in dialogue with id {}".format(
@@ -129,6 +136,12 @@ def get_metrics(
                         metrics.SLOT_TAGGING_RECALL
                     ] = slot_tagging_f1_scores.recall
                 frame_metric.update(goal_accuracy_dict)
+
+                thresholded_jga = linear_thresholding(goal_accuracy_dict[metrics.JOINT_GOAL_ACCURACY],
+                                                      fuzzy_threshold)
+                extra_metrics = metrics.extra_metrics(dial_id, turn_id, service_name, intent, thresholded_jga,
+                                                      per_intent_metrics, past_intents)
+                frame_metric.update(extra_metrics)
 
                 frame_id = "{:s}-{:03d}-{:s}".format(
                     dial_id, turn_id, frame_hyp["service"]

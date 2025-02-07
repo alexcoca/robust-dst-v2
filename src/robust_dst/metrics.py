@@ -45,6 +45,7 @@ import collections
 
 import numpy as np
 from fuzzywuzzy import fuzz
+from absl import logging
 
 F1Scores = collections.namedtuple("F1Scores", ["f1", "precision", "recall"])
 
@@ -67,6 +68,12 @@ AVERAGE_NONCAT_ACCURACY = "average_noncat_accuracy"
 JOINT_GOAL_ACCURACY = "joint_goal_accuracy"
 JOINT_CAT_ACCURACY = "joint_cat_accuracy"
 JOINT_NONCAT_ACCURACY = "joint_noncat_accuracy"
+# (6) Consitency adjusted Joint goal accuracy.
+CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY = "consistency_adjusted_joint_goal_accuracy"
+# (7) Correct Turns
+CORRECT_TURNS = "correct_turns"
+# (8) Total Turns
+TOTAL_TURNS = "total_turns"
 
 NAN_VAL = "NA"
 
@@ -300,3 +307,73 @@ def get_average_and_joint_goal_accuracy(frame_ref, frame_hyp, service, use_fuzzy
     goal_acc[JOINT_NONCAT_ACCURACY] = np.prod(noncat_acc) if noncat_acc else NAN_VAL
 
     return goal_acc
+
+def _consistency_metrics(intent_id: str, turn_id: int, thresholded_jga: float, intent_dict) -> tuple[str, int, int, float]:
+    intent_correct = thresholded_jga > 0
+    prev_correct_turns = intent_dict[CORRECT_TURNS]
+    prev_consistency_adjusted_jga = intent_dict[CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY]
+    prev_total_turns = intent_dict[TOTAL_TURNS]
+    if prev_consistency_adjusted_jga == 0.0:  # wrong in the past, keep it wrong
+        if intent_correct:
+            logging.info(f"Recovery has been made in {intent_id} in turn {turn_id}")
+        consistency_adjusted_jga = 0.0
+        correct_turns = prev_correct_turns
+    else:  # correct in the past
+        consistency_adjusted_jga = thresholded_jga
+        correct_turns = prev_correct_turns + 2 if intent_correct else prev_correct_turns
+    total_turns = prev_total_turns + 2
+    return intent_id, correct_turns, total_turns, consistency_adjusted_jga
+
+def _none_intent_extra_metrics(dial_id: str, turn_id: int, thresholded_jga: float,
+                                 per_intent_metrics: dict, past_intents: dict) -> tuple[str, str, int, int, float]:
+    intent_correct = thresholded_jga > 0
+    assert turn_id > 0, "No case to handle first turn having intent none"
+    old_dial_turn_id = f"{dial_id}-{turn_id - 2}"
+    assert old_dial_turn_id in past_intents, f"No case to handle not having previous intents for {dial_id}-{turn_id}"
+    old_past_intents = past_intents[old_dial_turn_id]
+    assert len(old_past_intents) == 1, f"No case to handle previous none intent being different than one for {dial_id}-{turn_id}"
+    intent: str = old_past_intents[0]
+    intent_id = f"{dial_id}-{intent}"
+    intent_dict = per_intent_metrics[intent_id]
+    return intent, *_consistency_metrics(intent_id, turn_id, thresholded_jga, intent_dict)
+
+def _unique_intent_extra_metrics(dial_id: str, turn_id: int, intent: str, thresholded_jga: float,
+                                 per_intent_metrics: dict, past_intents: dict) -> tuple[str, int, int, float]:
+    intent_correct = thresholded_jga > 0
+    intent_id = f"{dial_id}-{intent}"
+    if intent_id not in per_intent_metrics:  # new intent introduced for this dialogue
+        consistency_adjusted_jga = thresholded_jga
+        correct_turns = 1 if intent_correct else 0
+        total_turns = 1
+        return intent_id, correct_turns, total_turns, consistency_adjusted_jga
+    # intent from previous turns in this dialogue
+    intent_dict = per_intent_metrics[intent_id]
+    return _consistency_metrics(intent_id, turn_id, thresholded_jga, intent_dict)
+
+def extra_metrics(dial_id: str, turn_id: int, service_name: str, intent: str, thresholded_jga: float, per_intent_metrics: dict,
+                  past_intents: dict):
+    dial_turn_id = f"{dial_id}-{turn_id}"
+    if dial_id == "1_00036":
+        logging.info(f"Processing {dial_turn_id}")
+    if intent.upper() != "NONE":
+        intent_id, correct_turns, total_turns, consistency_adjusted_jga = _unique_intent_extra_metrics(dial_id, turn_id, intent,
+                                                                               thresholded_jga, per_intent_metrics,
+                                                                               past_intents)
+    else:
+        intent, intent_id, correct_turns, total_turns, consistency_adjusted_jga = _none_intent_extra_metrics(dial_id, turn_id, thresholded_jga,
+                                                                               per_intent_metrics, past_intents)
+        # for all logging purposes, override the none intent with the previous non-none intent
+    # Need to store the intents seen so far incase the next intent is none
+    # storing as a list because sometimes we have two intents in one turn
+    if dial_turn_id not in past_intents:
+        past_intents[dial_turn_id] = [intent]
+    else:
+        past_intents[dial_turn_id].append(intent)
+    update_intent_dict = {CORRECT_TURNS: correct_turns,
+                          CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY: consistency_adjusted_jga,
+                          TOTAL_TURNS: total_turns}
+    per_intent_metrics[intent_id] = update_intent_dict.copy()
+    update_intent_dict[f'{service_name}/{intent}/{CORRECT_TURNS}'] = correct_turns
+    update_intent_dict[f'{service_name}/{intent}/{CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY}'] = consistency_adjusted_jga
+    update_intent_dict[f'{service_name}/{intent}/{TOTAL_TURNS}'] = total_turns
+    return update_intent_dict
