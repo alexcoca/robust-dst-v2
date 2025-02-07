@@ -147,7 +147,7 @@ def main(
         #     )
         #     with open(current_step_sgd_format_predictions_pth, "w") as f:
         #         json.dump(this_file_dials, f, indent=2)
-        with open(hyp_dir.joinpath("metrics_and_dialogues.json")) as f:
+        with open(hyp_dir.joinpath("metrics_and_dialogues.json"), "w") as f:
             json.dump(frame_metrics, f, indent=2)
 
 if __name__ == "__main__":
