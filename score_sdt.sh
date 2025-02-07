@@ -58,7 +58,8 @@ for ckpt in "${CHECKPOINTS[@]}"; do
         --refs_file "${REFS_FILE_PATH}" \
         --data_type "${SPLIT}" \
         --output_file "${OUT_FILE}" \
-        --save_files "${SAVE_FILES}"
+        --hyp_dir "${HYP_DIR}" \
+        --save_files "${SAVE_FILES}" \
 
     if [ $? -eq 0 ]; then
         echo "$(date +'%Y-%m-%d %H:%M:%S') - Checkpoint $ckpt - SUCCESS" >> "$LOG_FILE"
