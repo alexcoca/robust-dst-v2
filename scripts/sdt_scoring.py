@@ -139,14 +139,14 @@ def main(
         json.dump(all_metrics_aggregate, f, indent=4)
     if save_files:
         hyp_dir = Path(hyp_dir)
-        # for fname, this_file_dials in file_to_hyp_dials.items():
-        #     current_step_sgd_format_predictions_pth = hyp_dir.joinpath(fname)
-        #     logger.info(
-        #         "Saving formatted predictions at"
-        #         f" {current_step_sgd_format_predictions_pth}"
-        #     )
-        #     with open(current_step_sgd_format_predictions_pth, "w") as f:
-        #         json.dump(this_file_dials, f, indent=2)
+        for fname, this_file_dials in file_to_hyp_dials.items():
+            current_step_sgd_format_predictions_pth = hyp_dir.joinpath(fname)
+            logger.info(
+                "Saving formatted predictions at"
+                f" {current_step_sgd_format_predictions_pth}"
+            )
+            with open(current_step_sgd_format_predictions_pth, "w") as f:
+                json.dump(this_file_dials, f, indent=2)
         with open(hyp_dir.joinpath("metrics_and_dialogues.json"), "w") as f:
             json.dump(frame_metrics, f, indent=2)
 
