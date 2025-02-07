@@ -24,6 +24,10 @@ if [ "$SPLIT" == "test" ] && [ -z ${CHECKPOINTS+x} ]; then
   echo "Error: CHECKPOINTS must be specified when SPLIT is set to 'test'. Exiting."
   exit 1
 fi
+if [ -z ${SAVE_FILES+x} ]; then
+  echo "Frame metrics wil not be saved."
+  SAVE_FILES=false
+fi
 
 # Define paths
 VERSION=1
@@ -53,7 +57,8 @@ for ckpt in "${CHECKPOINTS[@]}"; do
         --predictions_file "${PREDICTION_FILE_PATH}" \
         --refs_file "${REFS_FILE_PATH}" \
         --data_type "${SPLIT}" \
-        --output_file "${OUT_FILE}"
+        --output_file "${OUT_FILE}" \
+        --save_files "${SAVE_FILES}"
 
     if [ $? -eq 0 ]; then
         echo "$(date +'%Y-%m-%d %H:%M:%S') - Checkpoint $ckpt - SUCCESS" >> "$LOG_FILE"
