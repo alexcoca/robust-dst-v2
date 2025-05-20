@@ -43,7 +43,7 @@ CMD="torchrun \
   --max_restarts 0 \
   --rdzv_backend c10d \
   --rdzv_endpoint localhost:0 \
-  -m scripts.run_dialogue_state_tracking $CONFIG_FILE > $LOG 2> $ERR"
+  -m scripts.run_dialogue_state_tracking $CONFIG_FILE"
 
 
 cd "$workdir" || exit
