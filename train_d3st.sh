@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:2
-#SBATCH --time=30:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ac2123@cam.ac.uk
 #! Uncomment this to prevent the job from being requeued (e.g. if
