@@ -24,9 +24,7 @@ export OMP_NUM_THREADS=1
 module load miniconda/3
 eval "$(conda shell.bash hook)"
 which python
-module load slurm
-eval "$(conda shell.bash hook)"
-conda activate robust-dst
+conda activate /home/ac2123/anaconda3/envs/robust-dst
 which python
 
 workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
