@@ -1,4 +1,5 @@
 #!/bin/bash
+#SBATCH -A GASIC-BHT26-SL2-GPU
 #SBATCH -J dummy-test
 #SBATCH --time=00:01:30
 #SBATCH --nodes=1
