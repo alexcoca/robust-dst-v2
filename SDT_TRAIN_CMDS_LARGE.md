@@ -24,12 +24,10 @@ PROMPT_ID=v0 SPLIT=dev CHECKPOINTS=22400,24000 EXPERIMENT_NAME=seed_420_replicat
 PROMPT_ID=v0 SPLIT=test CHECKPOINTS=4800 EXPERIMENT_NAME=seed_420_replicate_sdt_v0_large bash decode_sdt_intr.sh && exit
 
 
-
-
 ## Scoring 
 
 EXPERIMENT_NAME=seed_420_replicate_sdt_v0_large PROMPT_ID=v0 SPLIT=dev CHECKPOINTS=$(seq 1600 1600 22400 | paste -sd ",") bash score_sdt.sh
-EXPERIMENT_NAME=seed_420_replicate_sdt_v0_large PROMPT_ID=v0 SPLIT=test CHECKPOINTS=4800 bash score_sdt.sh
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v0_large PROMPT_ID=v0 SPLIT=test CHECKPOINTS=4800 bash score_sdt.sh
 
 
 ## Clean-up 
@@ -50,16 +48,12 @@ PROMPT_ID=v1 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large CHECKPOIN
 PROMPT_ID=v1 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large CHECKPOINTS=11200,12800 bash decode_sdt_intr.sh && exit
 PROMPT_ID=v1 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large CHECKPOINTS=14400,16000 bash decode_sdt_intr.sh && exit
 PROMPT_ID=v1 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large CHECKPOINTS=9600,17600 bash decode_sdt_intr.sh && exit
-
-- current interactive:
 PROMPT_ID=v1 SPLIT=test EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large CHECKPOINTS=4800 bash decode_sdt_intr.sh && exit
-
-- next interactive: - 
 
 
 ## Scoring
 EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large PROMPT_ID=v1 SPLIT=dev CHECKPOINTS=$(seq 1600 1600 17600 | paste -sd ",") bash score_sdt.sh
-EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large PROMPT_ID=v1 SPLIT=test CHECKPOINTS=4800 bash score_sdt.sh
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large PROMPT_ID=v1 SPLIT=test CHECKPOINTS=4800 bash score_sdt.sh
 
 ## Cleaup
 EXPERIMENT_NAME=seed_420_replicate_sdt_v1_large KEEP_CHECKPOINTS=4800 bash cleanup_checkpoints_neuron.sh
@@ -116,12 +110,12 @@ PROMPT_ID=v3 SPLIT=test EXPERIMENT_NAME=seed_420_replicate_sdt_v3_large CHECKPOI
 EXPERIMENT_NAME=seed_420_replicate_sdt_v3_large PROMPT_ID=v3 SPLIT=dev CHECKPOINTS=$(seq 1600 1600 16000 | paste -sd ",") bash score_sdt.sh
 EXPERIMENT_NAME=seed_420_replicate_sdt_v3_large PROMPT_ID=v3 SPLIT=dev CHECKPOINTS=$(seq 17600 1600 27200 | paste -sd ",") bash score_sdt.sh
 EXPERIMENT_NAME=seed_420_replicate_sdt_v3_large PROMPT_ID=v3 SPLIT=test CHECKPOINTS=14400 bash score_sdt.sh
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v3_large PROMPT_ID=v3 SPLIT=test CHECKPOINTS=14400 bash score_sdt.sh
 
 ## Cleanup
 
 EXPERIMENT_NAME=seed_420_replicate_sdt_v3_large KEEP_CHECKPOINTS=6400,14400 bash cleanup_checkpoints_neuron.sh
 EXPERIMENT_NAME=seed_420_replicate_sdt_v3_large KEEP_CHECKPOINTS=6400,14400 bash cleanup_checkpoints.sh
-
 
 # v4
 
@@ -130,16 +124,24 @@ python scripts/run_dialogue_state_tracking.py "configs/replicate_sdt_v4_neuron_l
 ## Inference
 
 PROMPT_ID=v4 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large CHECKPOINTS=1600,3200 bash decode_sdt_intr.sh && exit
-
-- current interactive
 PROMPT_ID=v4 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large CHECKPOINTS=4800,6400 bash decode_sdt_intr.sh && exit
-
-- next_interactive
 PROMPT_ID=v4 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large CHECKPOINTS=8000,9600 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v4 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large CHECKPOINTS=11200,12800 bash decode_sdt_intr.sh && exit
 PROMPT_ID=v4 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large CHECKPOINTS=11200,12800 bash decode_sdt_intr.sh && exit
 PROMPT_ID=v4 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large CHECKPOINTS=14400,16000 bash decode_sdt_intr.sh && exit
 
+- current interactive
+PROMPT_ID=v4 SPLIT=test EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large CHECKPOINTS=4800 bash decode_sdt_intr.sh && exit
 
+## Scoring
+
+EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large PROMPT_ID=v4 SPLIT=dev CHECKPOINTS=$(seq 1600 1600 16000 | paste -sd ",") bash score_sdt.sh
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large PROMPT_ID=v4 SPLIT=test CHECKPOINTS=4800 bash score_sdt.sh
+
+## Cleanup 
+
+EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large KEEP_CHECKPOINTS=4800 bash cleanup_checkpoints_neuron.sh
+EXPERIMENT_NAME=seed_420_replicate_sdt_v4_large KEEP_CHECKPOINTS=4800 bash cleanup_checkpoints.sh
 
 # 1 epoch:  10976 (11200)
 # 3 epochs: 32958 

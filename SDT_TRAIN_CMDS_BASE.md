@@ -49,9 +49,13 @@ OUT_FILE=${OUT_DIR}/metrics_${ckpt}.json
 
 python scripts/sdt_scoring.py --initialisation_file_path ${CONFIG_FILE_PATH} --predictions_file "${PREDICTION_FILE_PATH}" --refs_file ${REFS_FILE_PATH} --output_file ${OUT_FILE}
 
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v0 PROMPT_ID=v0 SPLIT=test CHECKPOINTS=16000 bash score_sdt_neuron.sh
+
 # v1 
 
 python scripts/run_dialogue_state_tracking.py "configs/replicate_sdt_v1_neuron.json"
+
+## Scoring
 
 ## Inference
 
@@ -61,11 +65,77 @@ CHECKPOINTS=14400 PROMPT_ID=v1 SPLIT=test EXPERIMENT_NAME=seed_420_replicate_sdt
 ## Scoring
 EXPERIMENT_NAME=seed_420_replicate_sdt_v1 PROMPT_ID=v1 SPLIT=dev CHECKPOINTS=$(seq 1600 1600 32000 | paste -sd ",") bash score_sdt_neuron.sh
 EXPERIMENT_NAME=seed_420_replicate_sdt_v1 PROMPT_ID=v1 SPLIT=dev CHECKPOINTS=$(seq 33600 1600 54400 | paste -sd ",") bash score_sdt_neuron.sh
-EXPERIMENT_NAME=seed_420_replicate_sdt_v1 PROMPT_ID=v1 SPLIT=test CHECKPOINTS=14400 bash score_sdt_neuron.sh
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v1 PROMPT_ID=v1 SPLIT=test CHECKPOINTS=14400 bash score_sdt_neuron.sh
 
 # v2
 
-python scripts/run_dialogue_state_tracking.py "configs/replicate_sdt_v2_neuron.json"
+python scripts/run_dialogue_state_tracking.py "configs/replicate_sdt_v2_neuron.json" 
 PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 bash decode_sdt_neuron.sh
 
 
+## Inference 
+
+PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=1600,3200,4800,6400,8000 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=9600,11200,12800 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=14400,16000,17600,19200,20800 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=22400,24000,25600,27200,28800 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=30400,32000,33600,35200,36800 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=38400,40000,41600,43200,44800 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=46400,48000,49600,51200,52800 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v2 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=54400 bash decode_sdt_intr.sh
+PROMPT_ID=v2 SPLIT=test EXPERIMENT_NAME=seed_420_replicate_sdt_v2 CHECKPOINTS=32000 bash decode_sdt_intr.sh
+
+
+## Scoring
+
+EXPERIMENT_NAME=seed_420_replicate_sdt_v2 PROMPT_ID=v2 SPLIT=dev CHECKPOINTS=$(seq 1600 1600 20800 | paste -sd ",") bash score_sdt.sh
+EXPERIMENT_NAME=seed_420_replicate_sdt_v2 PROMPT_ID=v2 SPLIT=dev CHECKPOINTS=$(seq 22400 1600 28800 | paste -sd ",") bash score_sdt.sh
+EXPERIMENT_NAME=seed_420_replicate_sdt_v2 PROMPT_ID=v2 SPLIT=dev CHECKPOINTS=$(seq 30400 1600 52800 | paste -sd ",") bash score_sdt.sh
+EXPERIMENT_NAME=seed_420_replicate_sdt_v2 PROMPT_ID=v2 SPLIT=dev CHECKPOINTS=54400 bash score_sdt.sh
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v2 PROMPT_ID=v2 SPLIT=test CHECKPOINTS=32000 bash score_sdt.sh
+
+
+## Cleanup
+
+EXPERIMENT_NAME=seed_420_replicate_sdt_v2 KEEP_CHECKPOINTS=32000 bash cleanup_checkpoints.sh
+EXPERIMENT_NAME=seed_420_replicate_sdt_v2 KEEP_CHECKPOINTS=32000 bash cleanup_checkpoints_neuron.sh
+
+# v3
+
+python scripts/run_dialogue_state_tracking.py "configs/replicate_sdt_v3_neuron.json"
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=1600 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=3200,4800,6400,8000,9600 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=11200,12800,14400,16000,17600 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=19200,20800,22400 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=24000,25600 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=27200,28800,30400,32000,33600 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=35200,36800,38400,40000,41600 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=43200,44800,46400,48000,49600 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=51200,52800,54400 bash decode_sdt_intr.sh && exit
+PROMPT_ID=v3 SPLIT=test EXPERIMENT_NAME=seed_420_replicate_sdt_v3 CHECKPOINTS=19200 bash decode_sdt_intr.sh && exit
+
+
+
+## Scoring 
+
+EXPERIMENT_NAME=seed_420_replicate_sdt_v3 PROMPT_ID=v2 SPLIT=dev CHECKPOINTS=$(seq 1600 1600 54400 | paste -sd ",") bash score_sdt.sh
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v3 PROMPT_ID=v3 SPLIT=test CHECKPOINTS=19200 bash score_sdt.sh
+
+# v4 
+
+(timeout 9h python scripts/run_dialogue_state_tracking.py "configs/replicate_sdt_v4_neuron.json" || echo "Timed out; moving on") && PROMPT_ID=v4 SPLIT=dev EXPERIMENT_NAME=seed_420_replicate_sdt_v4 CHECKPOINTS=$(seq 1600 1600 54400 | paste -sd ",") bash decode_sdt_neuron.sh
+
+PROMPT_ID=v4 SPLIT=test EXPERIMENT_NAME=seed_420_replicate_sdt_v4 CHECKPOINTS=16000 bash decode_sdt_neuron.sh
+
+## Scoring 
+
+EXPERIMENT_NAME=seed_420_replicate_sdt_v4 PROMPT_ID=v4 SPLIT=dev CHECKPOINTS=$(seq 1600 1600 54400 | paste -sd " bash score_sdt_neuron.sh
+SAVE_FILES=true EXPERIMENT_NAME=seed_420_replicate_sdt_v4 PROMPT_ID=v4 SPLIT=test CHECKPOINTS=16000 bash score_sdt_neuron.sh
+
+## Clean-up
+
+EXPERIMENT_NAME=seed_420_replicate_sdt_v4 KEEP_CHECKPOINTS=9600,16000 bash cleanup_checkpoints_neuron.sh
+
+# 1 epoch:  10976 (11200)
+# 3 epochs: 32958 
+# 2 epochs: 21952 (22400)
