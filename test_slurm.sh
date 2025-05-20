@@ -3,8 +3,8 @@
 #SBATCH -J dummy-test
 #SBATCH --time=00:01:30
 #SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=32
 #SBATCH --gres=gpu:2
 #SBATCH --chdir=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2
 #SBATCH --output=logs/%x.%j.out
