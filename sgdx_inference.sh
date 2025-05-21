@@ -7,10 +7,14 @@ PROC_NUM_WORK=16
 WANDB_ENTITY=byrne-lab
 WANDB_PROJECT=pegasussa
 INFERENCE_BATCH_SIZE=64
+LOGFILE="run.log"
 declare -a SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
 declare -a CKPTS=("/scratch/dev/robust-dst-v2/models/seed_20230110_d3st_centroids/version_1/checkpoint-20000")
 for SGD_SHARD in "${SHARDS[@]}"; do
   for CHECKPOINT_DIR in "${CKPTS[@]}"; do
+    printf '%s  shard=%s  ckpt=%s\n' "$(date -Iseconds)" "$SGD_SHARD" \
+           "$(basename "$CHECKPOINT_DIR")" >> "$LOGFILE"
+           
     python -m scripts.run_dialogue_state_tracking \
       --model_name_or_path "$CHECKPOINT_DIR" \
       --output_dir "$CHECKPOINT_DIR" \
