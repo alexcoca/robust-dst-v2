@@ -10,7 +10,7 @@
     "data/processed/pegasus_finetuned_sbert/v4/train/version_1/data.json",
     "data/processed/pegasus_finetuned_sbert/v5/train/version_1/data.json"
   ],
-  "validation_file": "",
+  "validation_file": "data/processed/original/dev/version_1/data.json",
   "validation_template_dir": "data/interim/blank_dialogue_templates/original/dev",
   "validation_ref_dir": "data/raw/original/dev",
   "preprocessing_num_workers": 128,

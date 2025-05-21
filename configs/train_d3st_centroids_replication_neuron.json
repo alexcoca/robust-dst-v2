@@ -37,7 +37,7 @@
   "wandb_entity": "byrne-lab",
   "wandb_project": "pegasussa",
   "wandb_log_model": true,
-  "seed": 20230110,
+  "seed": 20230111,
   "num_train_epochs": 15,
   "max_target_length": 512,
   "val_max_target_length": 512,

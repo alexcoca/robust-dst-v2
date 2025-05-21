@@ -1,7 +1,7 @@
 {
   "model_name_or_path": "google/t5-v1_1-base",
   "cache_dir": "cache",
-  "experiment_name": "d3st_centroids_run2",
+  "experiment_name": "d3st_centroids",
   "train_file": [
     "data/processed/original/train/version_1/data.json",
     "data/processed/finetuned_centroids/v1/train/version_1/data.json",
