@@ -6,7 +6,6 @@
 #SBATCH --ntasks=2
 #SBATCH --cpus-per-task=32
 #SBATCH --gres=gpu:2
-#SBATCH --chdir=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2
 #SBATCH --output=logs/%x.%j.out
 #SBATCH --error=logs/%x.%j.err
 #SBATCH -p ampere
