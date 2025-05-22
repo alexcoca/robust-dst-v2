@@ -155,12 +155,13 @@ def main(
     frame_metric_paths = nested_defaultdict(list, depth=3)
     for model in models:
         for variant in schema_variants:
-            this_model_schema_variant_paths = list(
-                Path(hyps_source_dir, model, variant, _SPLIT).glob(
+            path_prefix = Path(hyps_source_dir, model, variant, _SPLIT, version)
+            logger.info(f"Path prefix: {path_prefix}")
+            print(path_prefix.glob(f"{_CHECKPOINT_PREFIX}*"))
+            this_model_schema_variant_paths = list(path_prefix.glob(
                     f"{_CHECKPOINT_PREFIX}*"
                 )
             )
-            print(str(Path(hyps_source_dir, model, variant, _SPLIT)))
             this_model_schema_variant_paths = sorted(
                 this_model_schema_variant_paths,
                 key=lambda pth: int(pth.name.split("-")[1]),
