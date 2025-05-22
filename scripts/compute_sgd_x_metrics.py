@@ -160,6 +160,7 @@ def main(
                     f"{_CHECKPOINT_PREFIX}*"
                 )
             )
+            print(str(Path(hyps_source_dir, model, variant, _SPLIT, version)))
             this_model_schema_variant_paths = sorted(
                 this_model_schema_variant_paths,
                 key=lambda pth: int(pth.name.split("-")[1]),
