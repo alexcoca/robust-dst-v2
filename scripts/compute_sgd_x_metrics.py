@@ -156,7 +156,7 @@ def main(
     for model in models:
         for variant in schema_variants:
             this_model_schema_variant_paths = list(
-                Path(hyps_source_dir, model, variant, _SPLIT, version).glob(
+                Path(hyps_source_dir, model, variant, _SPLIT).glob(
                     f"{_CHECKPOINT_PREFIX}*"
                 )
             )
