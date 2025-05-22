@@ -125,7 +125,7 @@ def get_metric_sensitivity(scores: np.ndarray) -> float:
     "--original",
     "original",
     is_flag=True,
-    default=True,
+    default=False,
 )
 @click.option(
     "-a",
@@ -157,7 +157,6 @@ def main(
         for variant in schema_variants:
             path_prefix = Path(hyps_source_dir, model, variant, _SPLIT, version)
             logger.info(f"Path prefix: {path_prefix}")
-            print(path_prefix.glob(f"{_CHECKPOINT_PREFIX}*"))
             this_model_schema_variant_paths = list(path_prefix.glob(
                     f"{_CHECKPOINT_PREFIX}*"
                 )
