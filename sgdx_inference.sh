@@ -10,7 +10,8 @@ INFERENCE_BATCH_SIZE=64
 LOGFILE="run.log"
 declare -a SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
 #declare -a CKPTS=("/scratch/dev/robust-dst-v2/models/seed_20230110_d3st_centroids/version_1/checkpoint-20000")
-declare -a CKPTS=("/scratch/dev/robust-dst-v2/models/seed_20230111_d3st_centroids/version_1/checkpoint-30000")
+#declare -a CKPTS=("/scratch/dev/robust-dst-v2/models/seed_20230111_d3st_centroids/version_1/checkpoint-30000")
+declare -a CKPTS=("/scratch/dev/robust-dst-v2/models/seed_20230110_d3st_finetuned_pegasus_sbert/version_1/checkpoint-15000")
 for SGD_SHARD in "${SHARDS[@]}"; do
   for CHECKPOINT_DIR in "${CKPTS[@]}"; do
     printf '%s  shard=%s  ckpt=%s\n' "$(date -Iseconds)" "$SGD_SHARD" \
