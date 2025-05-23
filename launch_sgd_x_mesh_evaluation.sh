@@ -54,7 +54,7 @@ module load rhel8/default-amp              # REQUIRED - loads the basic environm
 module load python/3.8
 module load miniconda/3
 eval "$(conda shell.bash hook)"
-conda activate /home/ac2123/anaconda3/envs/dst
+conda activate /home/ac2123/anaconda3/envs/robust-dst
 which python
 
 SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
