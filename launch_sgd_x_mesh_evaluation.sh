@@ -51,7 +51,6 @@ module purge                               # Removes all modules still loaded
 module load rhel8/default-amp              # REQUIRED - loads the basic environment
 
 #! Insert additional module load commands after this line if needed:
-module load python/3.8
 module load miniconda/3
 eval "$(conda shell.bash hook)"
 conda activate /home/ac2123/anaconda3/envs/robust-dst
