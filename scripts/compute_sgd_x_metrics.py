@@ -189,6 +189,9 @@ def main(
     in_domain_services = get_in_domain_services(
         orig_train_schema_path, orig_test_schema_path
     )
+    logger.info(
+        f"In domain services: {in_domain_services}"
+    )
     # Retrieve scores for all models, schema variant and optimization step
     # given a split and input data version
     all_scores = nested_defaultdict(list, depth=3)
@@ -220,7 +223,9 @@ def main(
                                 this_step_idx_all_scores.append(
                                     frame["metrics"][metric]
                                 )
-                                if frame["service"][:-1] in in_domain_services:
+                                service_name = frame["service"][:-1]
+                                logger.info(f"Service name: {service_name}")
+                                if service_name in in_domain_services:
                                     this_step_idx_seen_scores.append(
                                         frame["metrics"][metric]
                                     )
