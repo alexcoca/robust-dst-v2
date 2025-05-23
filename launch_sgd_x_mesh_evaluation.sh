@@ -12,14 +12,14 @@
 #! Name of the job:
 #SBATCH -J SGDX-INFERENCE
 #! Which project should be charged (NB Wilkes2 projects end in '-GPU'):
-#SBATCH -A BYRNE-SL3-GPU
+#SBATCH -A GASIC-BHT26-SL2-GPU
 #! How many whole nodes should be allocated?
 #SBATCH --nodes=1
 #! Specify the number of GPUs per node (between 1 and 4; must be 4 if nodes>1).
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=0:50:00
+#SBATCH --time=0:30:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ac2123@cam.ac.uk
