@@ -87,7 +87,7 @@ options="--model_name_or_path $CHECKPOINT_DIR \
 --cache_dir cache_$SLURM_JOB_ID \
 --test_file data/processed/$SGD_SHARD/test/version_$VERSION/data.json \
 --test_template_dir data/interim/blank_dialogue_templates/$SGD_SHARD/test \
---test_ref_dir data/raw/sgd_x/$SGD_SHARD/test \
+--test_ref_dir data/raw/$SGD_SHARD/test \
 --preprocessing_num_workers $PROC_NUM_WORK \
 --per_device_eval_batch_size $BATCH_SIZE \
 --report_to wandb \
