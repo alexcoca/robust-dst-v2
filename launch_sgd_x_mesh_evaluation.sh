@@ -56,7 +56,10 @@ eval "$(conda shell.bash hook)"
 conda activate /home/ac2123/anaconda3/envs/robust-dst
 which python
 
-SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
+if [ -z ${SHARDS+x} ]; then
+  SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
+fi
+
 SGD_SHARD=${SHARDS[$SLURM_ARRAY_TASK_ID]}
 
 if [ -z ${CHECKPOINT_DIR+x} ]; then
