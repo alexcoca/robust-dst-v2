@@ -79,7 +79,7 @@ if [ -z ${BATCH_SIZE+x} ]; then
   echo "Decoding with batch size $BATCH_SIZE"
 fi
 #! Full path to application executable:
-application="python -m src.run_dialogue_state_tracking"
+application="python -m scripts.run_dialogue_state_tracking"
 
 #! Run options for the application:
 options="--model_name_or_path $CHECKPOINT_DIR \
