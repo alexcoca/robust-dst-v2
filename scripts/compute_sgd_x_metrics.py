@@ -223,8 +223,9 @@ def main(
                                 this_step_idx_all_scores.append(
                                     frame["metrics"][metric]
                                 )
-                                service_name = frame["service"][:-1]
-                                logger.info(f"Service name: {service_name}")
+                                service_name = frame["service"]
+                                if not original:
+                                    service_name = service_name[:-1]
                                 if service_name in in_domain_services:
                                     this_step_idx_seen_scores.append(
                                         frame["metrics"][metric]
