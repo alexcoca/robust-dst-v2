@@ -85,7 +85,7 @@ application="python -m scripts.run_dialogue_state_tracking"
 options="--model_name_or_path $CHECKPOINT_DIR \
 --output_dir $CHECKPOINT_DIR \
 --cache_dir cache_$SLURM_JOB_ID \
---test_file data/preprocessed/$SGD_SHARD/test/version_$VERSION/data.json \
+--test_file data/processed/$SGD_SHARD/test/version_$VERSION/data.json \
 --test_template_dir data/interim/blank_dialogue_templates/$SGD_SHARD/test \
 --test_ref_dir data/raw/sgd_x/$SGD_SHARD/test \
 --preprocessing_num_workers $PROC_NUM_WORK \
