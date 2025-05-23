@@ -56,11 +56,14 @@ eval "$(conda shell.bash hook)"
 conda activate /home/ac2123/anaconda3/envs/robust-dst
 which python
 
-if [ -z ${SHARDS+x} ]; then
-  SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
+if [ -z "${SHARDS+x}" ]; then
+  SHARD_ARRAY=("original" "v1" "v2" "v3" "v4" "v5")
+else
+  # Convert space-separated string into array
+  IFS=' ' read -r -a SHARD_ARRAY <<< "$SHARDS"
 fi
 
-SGD_SHARD=${SHARDS[$SLURM_ARRAY_TASK_ID]}
+SGD_SHARD=${SHARD_ARRAY[$SLURM_ARRAY_TASK_ID]}
 
 if [ -z ${CHECKPOINT_DIR+x} ]; then
   echo "Please pass the path to the directory of the checkpoint you want to run inference on by prepending
