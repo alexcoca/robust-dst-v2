@@ -273,7 +273,7 @@ def main():
         config.max_length = data_args.val_max_target_length
     if data_args.num_beams is not None:
         config.num_beams = data_args.num_beams
-
+    logger.info(f"Using fast tokenizer: {model_args.use_fast_tokenizer}")
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name
         if model_args.tokenizer_name
