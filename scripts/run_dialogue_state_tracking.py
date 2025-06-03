@@ -141,6 +141,7 @@ def main():
             if not Path(log_dir).exists():
                 Path(log_dir).mkdir(exist_ok=True, parents=True)
             training_args.output_dir = output_dir
+            assert Path(output_dir).exists()
             training_args.run_name = (
                 f"{training_args.run_name}_{model_input_data_version}"
             )
