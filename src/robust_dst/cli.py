@@ -127,7 +127,7 @@ class DataTrainingArguments:
         },
     )
     discard_truncated_examples: bool = field(
-        default=False,
+        default=True,
         metadata={
             "help": (
                 "Whether to discard examples with inputs exceeding the max_length when"

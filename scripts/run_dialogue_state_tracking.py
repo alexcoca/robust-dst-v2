@@ -432,7 +432,7 @@ def main():
                 train_dataset,
                 desc="Running tokenizer on train dataset",
                 augment_style=data_args.augment_style,
-                truncation=False,
+                truncation=True,
                 omit_confirmation_turns=data_args.omit_confirmation_turns,
                 discard_truncated_examples=data_args.discard_truncated_examples,
             )
