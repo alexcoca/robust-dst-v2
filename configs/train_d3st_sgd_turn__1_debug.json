@@ -39,5 +39,5 @@
   "ensure_determinism": true,
   "overwrite_cache": true,
   "augment_style": "TURN",
-  "discard_truncated_examples": true,
+  "discard_truncated_examples": true
 }
