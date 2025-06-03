@@ -119,6 +119,8 @@ class Preprocessor(PipelineMixin):
             Tokenized dataset batch with columns: input_ids, attention_mask, labels
         """
         # remove pairs where at least one record is None
+        logger.info(f"Truncation set to: {truncation}")
+        logger.info(f"Return overflowing tokens set to: {truncation and discard_truncated_examples}")
         inputs, targets = [], []
         for i in range(len(examples[self.source_column])):
             if (
@@ -129,10 +131,6 @@ class Preprocessor(PipelineMixin):
                 targets.append(examples[self.target_column][i])
 
         inputs = [self.input_prefix + inp for inp in inputs]
-        logger.warning(f"Truncation set to: {truncation}")
-        print(f"Truncation set to: {truncation}")
-        logger.warning(f"Return overflowing tokens set to: {truncation and discard_truncated_examples}")
-        print(f"Return overflowing tokens set to: {truncation and discard_truncated_examples}")
         model_inputs = self.tokenizer(
             text=inputs,
             max_length=self.max_source_length,
