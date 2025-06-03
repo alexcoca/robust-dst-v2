@@ -431,7 +431,32 @@ def main():
             if data_args.augment_style != "NONE":
                 # this is tokenized so the tokenizer needs to be loaded to detokenize
                 # the data
-                train_dataset.to_json(f"{training_args.output_dir}/train_dataset.json")
+                from pathlib import Path
+                import json
+
+                if training_args.local_rank in (-1, 0):  # run once
+                    logger.info("Writing human-readable dataset to disk")
+                    readable_path = Path(training_args.output_dir) / "train_readable.jsonl"
+                    label_pad = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
+
+                    with readable_path.open("w", encoding="utf-8") as f:
+                        for ex in train_dataset:
+                            # remove padding / ignore tokens from the label stream
+                            label_ids = [i for i in ex["labels"] if i != label_pad]
+
+                            record = {
+                                "input_text": tokenizer.decode(ex["input_ids"],
+                                                               skip_special_tokens=False),
+                                "target_text": tokenizer.decode(label_ids,
+                                                                skip_special_tokens=False),
+                                # keep the raw ids as well, if you still want them
+                                "input_ids": ex["input_ids"],
+                                "label_ids": label_ids,
+                            }
+                            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+                    logger.info(f"Wrote human-readable training set to {readable_path}")
+                # train_dataset.to_json(f"{training_args.output_dir}/train_dataset.json")
 
     if training_args.do_eval:
         preprocessor.max_target_length = data_args.val_max_target_length
