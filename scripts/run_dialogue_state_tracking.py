@@ -417,6 +417,9 @@ def main():
         logger.info(
             f"Processing training dataset, KST augmentation: {data_args.augment_style}"
         )
+        logger.info(
+            f"Processing training dataset, discard truncated examples: {data_args.discard_truncated_examples}"
+        )
         with training_args.main_process_first(
             local=False, desc="train dataset map pre-processing"
         ):
