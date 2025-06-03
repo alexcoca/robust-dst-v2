@@ -94,6 +94,9 @@ def main():
         # parse arguments passed in a .json file
         json_file_path = os.path.abspath(sys.argv[-1])
         logger.info(f"Parsing arguments in .json format at path {json_file_path}")
+        with open(json_file_path, 'r') as f:
+            json_args = json.load(f)
+        logger.warning(f"The following arguments were specified in json: {json_file_path}")
         model_args, data_args, training_args = arg_parser.parse_json_file(
             json_file=json_file_path
         )
@@ -193,7 +196,6 @@ def main():
         f" training: {training_args.fp16}"
     )
     logger.info(f"Training/evaluation parameters {training_args}")
-    print(training_args)
     # Detecting last checkpoint.
     last_checkpoint = None
     if (
@@ -693,7 +695,8 @@ def main():
 
         if training_args.local_rank in (-1, 0):  # run once
             logger.info("Writing human-readable dataset to disk")
-            readable_path = Path(training_args.output_dir) / "train_readable.jsonl"
+            readable_path = Path(training_args.output_dir).absolute() / "train_readable.jsonl"
+            logger.info(f"Dataset will be dumped at {readable_path}")
             label_pad = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
 
             with readable_path.open("w", encoding="utf-8") as f:
