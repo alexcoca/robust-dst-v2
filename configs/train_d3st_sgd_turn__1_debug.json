@@ -40,6 +40,4 @@
   "overwrite_cache": true,
   "augment_style": "TURN",
   "discard_truncated_examples": true,
-  "max_train_samples": 100,
-  "max_predict_samples": 100
 }
