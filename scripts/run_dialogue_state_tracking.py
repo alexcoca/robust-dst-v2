@@ -96,6 +96,7 @@ def main():
         logger.info(f"Parsing arguments in .json format at path {json_file_path}")
         with open(json_file_path, 'r') as f:
             json_args = json.load(f)
+        logger.info(f"JSON content: {json_args}")
         logger.warning(f"The following arguments were specified in json: {json_file_path}")
         model_args, data_args, training_args = arg_parser.parse_json_file(
             json_file=json_file_path
