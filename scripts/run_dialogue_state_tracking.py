@@ -431,8 +431,6 @@ def main():
             if data_args.augment_style != "NONE":
                 # this is tokenized so the tokenizer needs to be loaded to detokenize
                 # the data
-                from pathlib import Path
-                import json
 
                 if training_args.local_rank in (-1, 0):  # run once
                     logger.info("Writing human-readable dataset to disk")
