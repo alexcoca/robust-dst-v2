@@ -40,7 +40,7 @@ from transformers import (
     HfArgumentParser,
     get_constant_schedule_with_warmup,
     is_wandb_available,
-    set_seed,
+    set_seed, PreTrainedTokenizerFast,
 )
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
@@ -167,7 +167,7 @@ def main():
 
     transformers.utils.logging.enable_default_handler()
     transformers.utils.logging.enable_explicit_format()
-    
+
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
@@ -191,7 +191,7 @@ def main():
         f" training: {training_args.fp16}"
     )
     logger.info(f"Training/evaluation parameters {training_args}")
-
+    print(training_args)
     # Detecting last checkpoint.
     last_checkpoint = None
     if (
@@ -277,6 +277,7 @@ def main():
     if data_args.num_beams is not None:
         config.num_beams = data_args.num_beams
     logger.info(f"Using fast tokenizer: {model_args.use_fast_tokenizer}")
+    print(f"Using fast tokenizer: {model_args.use_fast_tokenizer}")
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name
         if model_args.tokenizer_name
@@ -286,6 +287,7 @@ def main():
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
     )
+    assert isinstance(tokenizer, PreTrainedTokenizerFast)
     model = AutoModelForSeq2SeqLM.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -417,10 +419,10 @@ def main():
         train_dataset = raw_datasets["train"]
         if data_args.max_train_samples is not None:
             train_dataset = train_dataset.select(range(data_args.max_train_samples))
-        logger.info(
+        logger.warning(
             f"Processing training dataset, KST augmentation: {data_args.augment_style}"
         )
-        logger.info(
+        logger.warning(
             f"Processing training dataset, discard truncated examples: {data_args.discard_truncated_examples}"
         )
         with training_args.main_process_first(
