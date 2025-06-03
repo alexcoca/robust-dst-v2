@@ -100,7 +100,7 @@ def main():
     else:
         logger.info("Parsing arguments into dataclasses")
         model_args, data_args, training_args = arg_parser.parse_args_into_dataclasses()
-    training_args = training_args.set_logging(level="info")
+    training_args = training_args.set_logging(level="info", replica_level="info")
     if not Path(model_args.cache_dir).exists():
         Path(model_args.cache_dir).resolve().mkdir(parents=True, exist_ok=True)
     if training_args.do_predict and training_args.do_eval:
@@ -169,6 +169,7 @@ def main():
 
     transformers.utils.logging.enable_default_handler()
     transformers.utils.logging.enable_explicit_format()
+    log_level = training_args.get_process_log_level()
 
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
@@ -178,8 +179,8 @@ def main():
             file_handler,
         ],
         force=True,
+        level=log_level
     )
-    log_level = training_args.get_process_log_level()
     logging.getLogger().setLevel(log_level)
     logger.setLevel(log_level)
     datasets.utils.logging.set_verbosity(log_level)
@@ -438,33 +439,6 @@ def main():
                 omit_confirmation_turns=data_args.omit_confirmation_turns,
                 discard_truncated_examples=data_args.discard_truncated_examples,
             )
-            if data_args.augment_style != "NONE":
-                # this is tokenized so the tokenizer needs to be loaded to detokenize
-                # the data
-
-                if training_args.local_rank in (-1, 0):  # run once
-                    logger.info("Writing human-readable dataset to disk")
-                    readable_path = Path(training_args.output_dir) / "train_readable.jsonl"
-                    label_pad = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
-
-                    with readable_path.open("w", encoding="utf-8") as f:
-                        for ex in train_dataset:
-                            # remove padding / ignore tokens from the label stream
-                            label_ids = [i for i in ex["labels"] if i != label_pad]
-
-                            record = {
-                                "input_text": tokenizer.decode(ex["input_ids"],
-                                                               skip_special_tokens=False),
-                                "target_text": tokenizer.decode(label_ids,
-                                                                skip_special_tokens=False),
-                                # keep the raw ids as well, if you still want them
-                                "input_ids": ex["input_ids"],
-                                "label_ids": label_ids,
-                            }
-                            f.write(json.dumps(record, ensure_ascii=False) + "\n")
-
-                    logger.info(f"Wrote human-readable training set to {readable_path}")
-                # train_dataset.to_json(f"{training_args.output_dir}/train_dataset.json")
 
     if training_args.do_eval:
         preprocessor.max_target_length = data_args.val_max_target_length
@@ -714,7 +688,33 @@ def main():
         if training_args.predict_with_generate
         else None,
     )
+    if data_args.augment_style != "NONE":
+        # this is tokenized so the tokenizer needs to be loaded to detokenize
+        # the data
 
+        if training_args.local_rank in (-1, 0):  # run once
+            logger.info("Writing human-readable dataset to disk")
+            readable_path = Path(training_args.output_dir) / "train_readable.jsonl"
+            label_pad = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
+
+            with readable_path.open("w", encoding="utf-8") as f:
+                for ex in train_dataset:
+                    # remove padding / ignore tokens from the label stream
+                    label_ids = [i for i in ex["labels"] if i != label_pad]
+
+                    record = {
+                        "input_text": tokenizer.decode(ex["input_ids"],
+                                                       skip_special_tokens=False),
+                        "target_text": tokenizer.decode(label_ids,
+                                                        skip_special_tokens=False),
+                        # keep the raw ids as well, if you still want them
+                        "input_ids": ex["input_ids"],
+                        "label_ids": label_ids,
+                    }
+                    f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+            logger.info(f"Wrote human-readable training set to {readable_path}")
+        # train_dataset.to_json(f"{training_args.output_dir}/train_dataset.json")
     def create_and_save_model_config(path: Union[str, Path]) -> None:
         config = {
             "data": preprocessing_configs,
