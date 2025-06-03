@@ -370,6 +370,7 @@ class DataTrainingArguments:
             self.val_max_target_length = self.max_target_length
 
 
+
 @dataclass
 class CustomSeq2SeqTrainingArguments(Seq2SeqTrainingArguments):
     optimizer: Optional[str] = field(
@@ -507,7 +508,7 @@ class CustomSeq2SeqTrainingArguments(Seq2SeqTrainingArguments):
             )
         },
     )
-    report_to: str = field(default=None, metadata={"help": ""})
+    report_to: List[str] = field(default=None, metadata={"help": ""})
     seed: int = field(
         default=230792,
         metadata={
