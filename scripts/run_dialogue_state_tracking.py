@@ -100,6 +100,7 @@ def main():
     else:
         logger.info("Parsing arguments into dataclasses")
         model_args, data_args, training_args = arg_parser.parse_args_into_dataclasses()
+    training_args = training_args.set_logging(level="info")
     if not Path(model_args.cache_dir).exists():
         Path(model_args.cache_dir).resolve().mkdir(parents=True, exist_ok=True)
     if training_args.do_predict and training_args.do_eval:
