@@ -28,7 +28,7 @@
   "save_steps": 5000,
   "early_stopping_patience": 3,
   "load_best_model_at_end": true,
-  "report_to": ["wandb"],
+  "report_to": "wandb",
   "wandb_entity": "byrne-lab",
   "wandb_project": "pegasussa",
   "wandb_log_model": true,
@@ -41,6 +41,5 @@
   "augment_style": "TURN",
   "discard_truncated_examples": true,
   "max_train_samples": 100,
-  "max_predict_samples": 100,
-  "max_eval_samples": 100
+  "max_predict_samples": 100
 }
