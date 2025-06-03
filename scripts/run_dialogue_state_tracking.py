@@ -104,7 +104,11 @@ def main():
     else:
         logger.info("Parsing arguments into dataclasses")
         model_args, data_args, training_args = arg_parser.parse_args_into_dataclasses()
-    training_args = training_args.set_logging(level="info", replica_level="info")
+    training_args = training_args.set_logging(
+        level="info",
+        replica_level="info",
+        report_to=training_args.report_to
+    )
     if training_args.report_to == "none":
         try:
             assert json_args["report_to"] == "none"
