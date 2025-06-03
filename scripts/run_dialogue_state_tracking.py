@@ -109,14 +109,6 @@ def main():
         replica_level="info",
         report_to=training_args.report_to
     )
-    if training_args.report_to == "none":
-        try:
-            assert json_args["report_to"] == "none"
-        except AssertionError:
-            logger.warning(
-                f"report_to was set to {json_args['report_to']} but was parsed as none. Forcing argument"
-            )
-            training_args.report_to = ["wandb"]
     if not Path(model_args.cache_dir).exists():
         Path(model_args.cache_dir).resolve().mkdir(parents=True, exist_ok=True)
     if training_args.do_predict and training_args.do_eval:
@@ -294,7 +286,6 @@ def main():
     if data_args.num_beams is not None:
         config.num_beams = data_args.num_beams
     logger.info(f"Using fast tokenizer: {model_args.use_fast_tokenizer}")
-    print(f"Using fast tokenizer: {model_args.use_fast_tokenizer}")
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name
         if model_args.tokenizer_name
@@ -718,13 +709,14 @@ def main():
                     label_ids = [i for i in ex["labels"] if i != label_pad]
 
                     record = {
-                        "input_text": tokenizer.decode(ex["input_ids"],
-                                                       skip_special_tokens=False),
-                        "target_text": tokenizer.decode(label_ids,
-                                                        skip_special_tokens=False),
-                        # keep the raw ids as well, if you still want them
-                        "input_ids": ex["input_ids"],
-                        "label_ids": label_ids,
+                        "input_text": tokenizer.decode(
+                            ex["input_ids"],
+                            skip_special_tokens=False
+                        ),
+                        "target_text": tokenizer.decode(
+                            label_ids,
+                            skip_special_tokens=False
+                        ),
                     }
                     f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -751,7 +743,6 @@ def main():
         model_config = OmegaConf.create(config)
         # needed for post-hoc parsing of raw predictions
         OmegaConf.save(config=model_config, f=path)
-
 
     # Training
     if training_args.do_train:
