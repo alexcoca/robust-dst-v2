@@ -110,7 +110,7 @@ def main():
             assert json_args["report_to"] == "none"
         except AssertionError:
             logger.warning(
-                f"report_to was set to {json_args['report to']} but was parsed as none. Forcing argument"
+                f"report_to was set to {json_args['report_to']} but was parsed as none. Forcing argument"
             )
             training_args.report_to = ["wandb"]
     if not Path(model_args.cache_dir).exists():

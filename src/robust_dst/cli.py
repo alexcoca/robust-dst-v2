@@ -508,7 +508,6 @@ class CustomSeq2SeqTrainingArguments(Seq2SeqTrainingArguments):
             )
         },
     )
-    report_to: List[str] = field(default=None, metadata={"help": ""})
     seed: int = field(
         default=230792,
         metadata={
