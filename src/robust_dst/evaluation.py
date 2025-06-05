@@ -137,10 +137,14 @@ def get_metrics(
                     ] = slot_tagging_f1_scores.recall
                 frame_metric.update(goal_accuracy_dict)
 
-                thresholded_jga = linear_thresholding(goal_accuracy_dict[metrics.JOINT_GOAL_ACCURACY],
-                                                      fuzzy_threshold)
-                extra_metrics = metrics.extra_metrics(dial_id, turn_id, service_name, intent, thresholded_jga,
-                                                      per_intent_metrics, past_intents)
+                thresholded_jga = linear_thresholding(
+                    goal_accuracy_dict[metrics.JOINT_GOAL_ACCURACY],
+                    fuzzy_threshold
+                )
+                extra_metrics = metrics.extra_metrics(
+                    dial_id, turn_id, service_name, intent, thresholded_jga,
+                    per_intent_metrics, past_intents
+                )
                 frame_metric.update(extra_metrics)
 
                 frame_id = "{:s}-{:03d}-{:s}".format(

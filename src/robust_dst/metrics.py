@@ -308,7 +308,13 @@ def get_average_and_joint_goal_accuracy(frame_ref, frame_hyp, service, use_fuzzy
 
     return goal_acc
 
-def _consistency_metrics(intent_id: str, turn_id: int, thresholded_jga: float, intent_dict) -> tuple[str, int, int, float]:
+
+def _consistency_metrics(
+    intent_id: str,
+    turn_id: int,
+    thresholded_jga: float,
+    intent_dict
+) -> tuple[str, int, int, float]:
     intent_correct = thresholded_jga > 0
     prev_correct_turns = intent_dict[CORRECT_TURNS]
     prev_consistency_adjusted_jga = intent_dict[CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY]
@@ -324,8 +330,14 @@ def _consistency_metrics(intent_id: str, turn_id: int, thresholded_jga: float, i
     total_turns = prev_total_turns + 2
     return intent_id, correct_turns, total_turns, consistency_adjusted_jga
 
-def _none_intent_extra_metrics(dial_id: str, turn_id: int, thresholded_jga: float,
-                                 per_intent_metrics: dict, past_intents: dict) -> tuple[str, str, int, int, float]:
+
+def _none_intent_extra_metrics(
+        dial_id: str,
+        turn_id: int,
+        thresholded_jga: float,
+        per_intent_metrics: dict,
+        past_intents: dict
+) -> tuple[str, str, int, int, float]:
     intent_correct = thresholded_jga > 0
     assert turn_id > 0, "No case to handle first turn having intent none"
     old_dial_turn_id = f"{dial_id}-{turn_id - 2}"
@@ -337,8 +349,15 @@ def _none_intent_extra_metrics(dial_id: str, turn_id: int, thresholded_jga: floa
     intent_dict = per_intent_metrics[intent_id]
     return intent, *_consistency_metrics(intent_id, turn_id, thresholded_jga, intent_dict)
 
-def _unique_intent_extra_metrics(dial_id: str, turn_id: int, intent: str, thresholded_jga: float,
-                                 per_intent_metrics: dict, past_intents: dict) -> tuple[str, int, int, float]:
+
+def _unique_intent_extra_metrics(
+    dial_id: str,
+    turn_id: int,
+    intent: str,
+    thresholded_jga: float,
+    per_intent_metrics: dict,
+    past_intents: dict
+) -> tuple[str, int, int, float]:
     intent_correct = thresholded_jga > 0
     intent_id = f"{dial_id}-{intent}"
     if intent_id not in per_intent_metrics:  # new intent introduced for this dialogue
@@ -350,18 +369,23 @@ def _unique_intent_extra_metrics(dial_id: str, turn_id: int, intent: str, thresh
     intent_dict = per_intent_metrics[intent_id]
     return _consistency_metrics(intent_id, turn_id, thresholded_jga, intent_dict)
 
-def extra_metrics(dial_id: str, turn_id: int, service_name: str, intent: str, thresholded_jga: float, per_intent_metrics: dict,
-                  past_intents: dict):
+def extra_metrics(
+    dial_id: str,
+    turn_id: int,
+    service_name: str,
+    intent: str,
+    thresholded_jga: float,
+    per_intent_metrics: dict,
+    past_intents: dict
+):
     dial_turn_id = f"{dial_id}-{turn_id}"
-    if dial_id == "1_00036":
-        logging.info(f"Processing {dial_turn_id}")
     if intent.upper() != "NONE":
-        intent_id, correct_turns, total_turns, consistency_adjusted_jga = _unique_intent_extra_metrics(dial_id, turn_id, intent,
-                                                                               thresholded_jga, per_intent_metrics,
-                                                                               past_intents)
+        intent_id, correct_turns, total_turns, consistency_adjusted_jga = _unique_intent_extra_metrics(
+            dial_id, turn_id, intent, thresholded_jga, per_intent_metrics, past_intents
+        )
     else:
-        intent, intent_id, correct_turns, total_turns, consistency_adjusted_jga = _none_intent_extra_metrics(dial_id, turn_id, thresholded_jga,
-                                                                               per_intent_metrics, past_intents)
+        intent, intent_id, correct_turns, total_turns, consistency_adjusted_jga = _none_intent_extra_metrics(
+            dial_id, turn_id, thresholded_jga, per_intent_metrics, past_intents)
         # for all logging purposes, override the none intent with the previous non-none intent
     # Need to store the intents seen so far incase the next intent is none
     # storing as a list because sometimes we have two intents in one turn
@@ -369,9 +393,11 @@ def extra_metrics(dial_id: str, turn_id: int, service_name: str, intent: str, th
         past_intents[dial_turn_id] = [intent]
     else:
         past_intents[dial_turn_id].append(intent)
-    update_intent_dict = {CORRECT_TURNS: correct_turns,
-                          CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY: consistency_adjusted_jga,
-                          TOTAL_TURNS: total_turns}
+    update_intent_dict = {
+        CORRECT_TURNS: correct_turns,
+        CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY: consistency_adjusted_jga,
+        TOTAL_TURNS: total_turns
+    }
     per_intent_metrics[intent_id] = update_intent_dict.copy()
     update_intent_dict[f'{service_name}/{intent}/{CORRECT_TURNS}'] = correct_turns
     update_intent_dict[f'{service_name}/{intent}/{CONSISTENCY_ADJUSTED_JOINT_GOAL_ACCURACY}'] = consistency_adjusted_jga
