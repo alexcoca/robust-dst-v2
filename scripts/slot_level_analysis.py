@@ -166,6 +166,7 @@ def analyse_variant(
     split: str,
     version: int,
     variant: Literal['v1', 'v2', 'v3', 'v4', 'v5', 'original'],
+    only_services: list[str] | None = None
 ) -> Dict[str, Dict[str, Dict[str, float]]]:
     """
     Return {service → slot → {tp,sub,fp,fn,ser}} aggregating *across seeds*.
@@ -173,7 +174,6 @@ def analyse_variant(
 
     # defaultdict(service) → defaultdict(slot) → Counter
     stats: Dict[str, Dict[str, Stat]] = defaultdict(lambda: defaultdict(Stat))
-
     # iterate *every* seed
     for seed_root in hyp_seed_dirs:
         hyp_dir = seed_root / variant / split / f"version_{version}"
@@ -194,6 +194,10 @@ def analyse_variant(
 
             # ----- dialogue-by-dialogue ---------------------------------
             for hd, rd in zip(hyp_dials, ref_dials):
+                this_dial_services = [strip_variant(s) for s in rd["services"]]
+                # skip services that are not of interest
+                if only_services is not None and not any(s in this_dial_services for s in only_services):
+                    continue
                 assert hd["dialogue_id"] == rd["dialogue_id"]
 
                 for h_turn, r_turn in zip(hd["turns"], rd["turns"]):
@@ -201,12 +205,13 @@ def analyse_variant(
                         continue
 
                     for h_fr, r_fr in zip(h_turn["frames"], r_turn["frames"]):
+                        if only_services is not None and strip_variant(h_fr["service"]) not in only_services:
+                            continue
                         canon_srv = strip_variant(r_fr["service"])
-                        if canon_srv not in ALIASES[variant]["_rev"]:
-                            console.print(
-                                f"[red]Warning: no alias mapping for service {canon_srv} in variant {variant}[/red]"
-                            )
-
+                        # if canon_srv not in ALIASES[variant]["_rev"]:
+                        #     console.print(
+                        #         f"[red]Warning: no alias mapping for service {canon_srv} in variant {variant}[/red]"
+                        #     )
                         alias_rev = ALIASES.get(
                             variant, {}
                         ).get("_rev", {}).get(
@@ -323,13 +328,13 @@ def main(argv: List[str] | None = None) -> None:
         if not ref_dir.exists():
             console.print(f"[yellow]Missing refs for {v}; skipping[/yellow]")
             continue
-
         res = analyse_variant(
             ref_dir,
             seed_dirs,
             split=args.split,
             version=args.version,
-            variant=v
+            variant=v,
+            only_services=args.services
         )
         frames.append(build_dataframe(res, v))
 
@@ -338,7 +343,6 @@ def main(argv: List[str] | None = None) -> None:
         sys.exit(1)
 
     df = pd.concat(frames, ignore_index=True)
-
     # optional filtering -------------------------------------------------
     if args.services:
         df = df[df.service.isin(args.services)]
