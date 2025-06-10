@@ -87,7 +87,6 @@ do
     --predict_with_generate \
     --max_target_length 512 \
     --val_max_target_length 512
-
 done
 # NB: -mod can be specified multiple times together with the --average flag to average results across seeds
 python -m scripts.compute_sgd_x_metrics \
@@ -294,8 +293,8 @@ do
   python -m scripts.ground_with_sampled_ksts \
     --seed 100 \
     --kst_table data/external/kst_table_$SGD_SHARD.json \
-    --data data/processed/original/test/version_$VERSION/data.json \
-    --out data/processed/turn/$SGD_SHARD \
+    --data data/processed/$SGD_SHARD/test/version_1/data.json \
+    --out data/processed/turn/$SGD_SHARD/test/version_$VERSION \
     --augment_style "TURN" \
     -v
 done
@@ -526,7 +525,7 @@ python -m scripts.compute_sgd_x_metrics \
 ```
 
 
-> From the models achive:
+> From the models archive:
 > 1. sgd_da/seed_202302261_d3st_sgd_sample_dialogue/version_9/checkpoint-35000
 > 2. sgd_da/seed_202302262_d3st_sgd_sample_dialogue/version_9/checkpoint-20000
 > 3. sgd_da/seed_202302263_d3st_sgd_sample_dialogue/version_9/checkpoint-25000
@@ -1294,3 +1293,202 @@ python -m scripts.run_dialogue_state_tracking \
 > 1. multiwoz_cross_dataset/seed_2023043004_multiwoz_sample_schema_dialogue_active/version_1/checkpoint-10200
 > 2. multiwoz_cross_dataset/seed_2023043005_multiwoz_sample_schema_dialogue_active/version_1/checkpoint-13600
 > 3. multiwoz_cross_dataset/seed_2023043006_multiwoz_sample_schema_dialogue_active/version_1/checkpoint-6800
+
+# Alex experiments - Weixuan KST table
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/seed_2023051401_d3st_sgd_turn/version_9/checkpoint-15000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+```
+Submitted batch job 10667362 + Submitted batch job 10719008 (ovewrote data)
+- Repro Weixuan results
+
+	
+# Alex experiments - manual KST table
+
+declare -a SHARDS=("v1" "v2" "v3" "v4" "v5")
+VERSION=9
+for SGD_SHARD in "${SHARDS[@]}"
+do
+  python -m scripts.ground_with_sampled_ksts \
+    --seed 100 \
+    --kst_table data/external/kst_table_$SGD_SHARD_manual.json \
+    --data data/processed/$SGD_SHARD/test/version_1/data.json \
+    --out data/processed/turn_manual/$SGD_SHARD/test/version_$VERSION \
+    --augment_style "TURN" \
+    -v
+done
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" GROUNDING="turn_manual" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/seed_2023051401_d3st_sgd_turn/version_9/checkpoint-15000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+```
+
+Submitted batch job 10679380
+
+
+
+CONFIG_FILE=configs/train_d3st_sgd_turn__1.json sbatch -J replicate_sgd_random_turn --time 16:05:00 train_d3st.sh
+
+CONFIG_FILE=configs/train_d3st_sgd_turn__1_debug.json sbatch -J replicate_sgd_random_turn --time 00:05:00 train_d3st.sh
+10696893
+
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/seed_2023051401_d3st_sgd_turn/version_9/checkpoint-15000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+
+	Submitted batch job 10667362
+```
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" GROUNDING="turn_manual" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/seed_2023051401_d3st_sgd_turn/version_9/checkpoint-15000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+
+Submitted batch job 10679810
+```
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" GROUNDING="turn_manual" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/seed_2023051403_d3st_sgd_turn/version_9/checkpoint-45000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+
+Submitted batch job 10690103
+```
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/seed_2023051403_d3st_sgd_turn/version_9/checkpoint-45000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+```
+Submitted batch job 10719095
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" GROUNDING="turn_manual" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/seed_2023051402_d3st_sgd_turn/version_9/checkpoint-20000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+
+Submitted batch job 10691152
+```
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/seed_2023051402_d3st_sgd_turn/version_9/checkpoint-20000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+
+Submitted batch job 10719204
+```
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/seed_2023060402_d3st_sgd_turn/version_1/checkpoint-30000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+
+Submitted batch job 10718416
+```
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" VERSION=9 CHECKPOINT_DIR=/home/ac2123/rds/rds-wjb31-nmt2020/ac2123/robust-dst-v2/models/seed_2023060402_d3st_sgd_turn/version_1/checkpoint-35000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+Submitted batch job 10721160
+```
+
+
+```bash
+CONFIG_FILE=configs/train_d3st_sgd_turn__2.json sbatch -J replicate_sgd_random_turn__3 --time 18:05:00 train_d3st.sh
+
+Submitted batch job 10727219
+```
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" VERSION=9 CHECKPOINT_DIR=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2/models/seed_2023060403_d3st_sgd_turn/version_1/checkpoint-35000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+
+Submitted batch job 10768323
+```
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" VERSION=9 CHECKPOINT_DIR=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2/models/seed_2023060404_d3st_sgd_turn/version_1/checkpoint-25000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+
+Submitted batch job 10768476
+```
+
+### Analysis
+
+python scripts/slot_level_analysis.py \
+       --refs-root data/raw \
+       --hyps-root hyps/d3st/d3st_turn_retrain \
+       --services Travel_1 Hotels_2 \
+       --slots attraction_name category rating \
+       --version 1 \
+       --variants v1 v2 v3 v4 v5
+
+
+
+### Compute consistency metrics for ensemble 
+
+
+1. Parse predictions to obtain dialogues_*.json files
+
+## SGD 
+
+python -m scripts.parse \
+    --belief_path /scratch/dev/d3st/hyps/seed_240463_d3st_concat_corpus_description_oracle/v1_examples/original/test/version_9/model.1760000 \
+    --schema_path /scratches/neuron/dev/robust_paraphrases/dstc8-schema-guided-dialogue/test/schema.json \
+    --template_dir /scratches/neuron/dev/robust_paraphrases/dstc8-schema-guided-dialogue/sgd_x/data/interim/blank_dialogue_templates/original/test \
+    --test_data /scratches/neuron/dev/d3st/data/preprocessed/corpus_descriptions_oracle/v1_examples/original/test/version_9/data.json -vvv
+  mkdir -p "metrics/seed_240463_d3st_concat_corpus_description_oracle_ensemble_v1_examples/original/test/version_9"
+
+python -m scripts.score \
+    --prediction_dir /scratch/dev/d3st/hyps/seed_240463_d3st_concat_corpus_description_oracle/v1_examples/original/test/version_9/model.1760000  \
+    --raw_data_dir /scratches/neuron/dev/robust_paraphrases/dstc8-schema-guided-dialogue/sgd_x/data/raw/original \
+    --eval_set test \
+    --output_metric_file metrics/seed_240463_d3st_concat_corpus_description_oracle_ensemble_v1_examples/original/test/version_9/model_1760000_metrics.json
+
+- Then replace v1_examples with "v2_examples" and "v3_examples" to calculate the rest of the metrics
+
+2. Ensemble inference script 
+
+
+```bash
+python scripts/ensambled_inference.py \
+    --version version_9 \
+    --variants original \
+    --models seed_240463_d3st_concat_corpus_description_oracle \
+    --scheme v1_examples --scheme v2_examples --scheme v3_examples \
+    --steps 1760000 \
+    --template_dir /scratches/neuron/dev/robust_paraphrases/dstc8-schema-guided-dialogue/sgd_x/data/interim/blank_dialogue_templates \
+    --ref_dir /scratches/neuron/dev/robust_paraphrases/dstc8-schema-guided-dialogue/sgd_x/data/raw -vv
+```
+ 
+
+
+## SGD-X v1 (example)
+
+python -m scripts.parse \
+    --belief_path /scratch/dev/d3st/hyps/seed_240463_d3st_concat_corpus_description_oracle/v1_examples/v1/test/version_9/model.1760000 \
+    --schema_path /scratches/neuron/dev/robust_paraphrases/dstc8-schema-guided-dialogue/sgd_x/data/raw/v1/test/schema.json \
+    --template_dir /scratches/neuron/dev/robust_paraphrases/dstc8-schema-guided-dialogue/sgd_x/data/interim/blank_dialogue_templates/v1/test \
+    --test_data /scratches/neuron/dev/d3st/data/preprocessed/corpus_descriptions_oracle/v1_examples/v1/test/version_9/data.json -vvv
+  mkdir -p "metrics/seed_240463_d3st_concat_corpus_description_oracle/v1/test/version_9"
+
+
+python -m scripts.score \
+    --prediction_dir /scratch/dev/d3st/hyps/seed_240463_d3st_concat_corpus_description_oracle/v1_examples/v1/test/version_9/model.1760000  \
+    --raw_data_dir /scratches/neuron/dev/robust_paraphrases/dstc8-schema-guided-dialogue/sgd_x/data/raw/v1 \
+    --eval_set test \
+    --output_metric_file metrics/seed_240463_d3st_concat_corpus_description_oracle/v1/test/version_9/model_1760000_metrics.json
+
+
+## Turn-slot decoding
+
+
+declare -a SHARDS=("original" "v1" "v2" "v3" "v4" "v5")
+for SGD_SHARD in "${SHARDS[@]}"
+do
+  python -m scripts.ground_with_sampled_ksts \
+    --seed 100 \
+    --kst_table data/external/kst_table_$SGD_SHARD.json \
+    --data data/processed/$SGD_SHARD/test/version_1/data.json \
+    --out data/processed/turnslot/$SGD_SHARD \
+    --augment_style "TURNSLOT" \
+    -v
+done
+
+```bash
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" GROUNDING="turnslot" VERSION=9 CHECKPOINT_DIR=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2/models/seed_2023051404_d3st_sgd_turnslot/version_9/checkpoint-45000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+Submitted batch job 10798857
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" SHARDS="v3 v4" GROUNDING="turnslot" VERSION=9 CHECKPOINT_DIR=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2/models/seed_2023051404_d3st_sgd_turnslot/version_9/checkpoint-45000 sbatch --array=0-1 launch_sgd_x_grounded_mesh_evaluation.sh
+Submitted batch job 10802325
+
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" GROUNDING="turnslot" VERSION=9 CHECKPOINT_DIR=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2/models/seed_2023051405_d3st_sgd_turnslot/version_9/checkpoint-35000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+Submitted batch job 10798870
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" SHARDS="v5" GROUNDING="turnslot" VERSION=9 CHECKPOINT_DIR=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2/models/seed_2023051405_d3st_sgd_turnslot/version_9/checkpoint-35000 sbatch --array=0-0 launch_sgd_x_grounded_mesh_evaluation.sh
+Submitted batch job 1080234
+
+CONDA_ENV_PATH="~/anaconda3/envs/robust-dst" GROUNDING="turnslot" VERSION=9 CHECKPOINT_DIR=/rds/project/rds-DuWT62BKvk8/ac2123/robust-dst-v2/models/seed_2023051407_d3st_sgd_turnslot/version_9/checkpoint-35000 sbatch launch_sgd_x_grounded_mesh_evaluation.sh
+Submitted batch job 10798872
+```
