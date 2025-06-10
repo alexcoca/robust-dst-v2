@@ -35,6 +35,15 @@ $ ./slot_error_analysis.py                                                \
         --split test                                                      \
         --version 9                                                       \
         --out slot_errors.csv
+
+$ ./slot_error_analysis.py                                                \
+        --refs-root data/raw                                              \
+        --hyps-root hyps/d3st_sgd_turn                                    \
+        --baseline-hyps-root hyps/d3st_baseline                          \
+        --baseline-version 7                                              \
+        --version 9                                                       \
+        --services Payment_1                                              \
+        --variants original
 """
 from __future__ import annotations
 
@@ -54,6 +63,7 @@ from rich.table import Table
 console = Console()
 
 ALIASES: Dict[str, Dict[str, str]] = {}
+
 
 def _load_schema(path: Path) -> List[dict]:
     with path.open(encoding="utf-8") as f:
@@ -76,6 +86,7 @@ def strip_variant(name: str) -> str:
         return name
     return name[: m.start(1)] + digits[:-1]
 
+
 def build_aliases(
         raw_root: Path,
         variants: List[str]
@@ -93,7 +104,7 @@ def build_aliases(
             canon_srv = svc_orig["service_name"]
             for field in ("slots", "intents"):
                 for item_o, item_v in zip(svc_orig[field], svc_var[field]):
-                    canon_slot_or_intent = item_o["name"]    # canonical key
+                    canon_slot_or_intent = item_o["name"]  # canonical key
                     var_slot_or_intent = item_v["name"]
                     mapping[canon_srv][canon_slot_or_intent] = var_slot_or_intent
                     reverse[canon_srv][var_slot_or_intent] = canon_slot_or_intent
@@ -103,6 +114,7 @@ def build_aliases(
         aliases["original"] = {"_rev": defaultdict(lambda: {})}
 
     return aliases
+
 
 # ---------------------------------------------------------------------------#
 #                               normalisation                                #
@@ -121,14 +133,14 @@ Stat = Counter  # alias for readability   {"tp", "sub", "fp", "fn"}
 def _update(stat: Stat, ref: set[str], hyp: set[str]) -> None:
     """Update *stat* with a single slot comparison."""
     if not ref and not hyp:
-        return                       # nothing to score
+        return  # nothing to score
 
     if ref and not hyp:
-        stat["fn"] += 1              # missed the slot entirely
+        stat["fn"] += 1  # missed the slot entirely
         return
 
     if hyp and not ref:
-        stat["fp"] += len(hyp)       # predicted a slot that’s not there
+        stat["fp"] += len(hyp)  # predicted a slot that's not there
         return
 
     # both non-empty -------------------------------------------------------
@@ -136,9 +148,9 @@ def _update(stat: Stat, ref: set[str], hyp: set[str]) -> None:
     wrong = hyp - ref
 
     if correct:
-        stat["tp"] += 1              # count once if *any* correct value
+        stat["tp"] += 1  # count once if *any* correct value
     else:
-        stat["sub"] += len(hyp)      # all values wrong
+        stat["sub"] += len(hyp)  # all values wrong
 
     # still penalise the extra wrong values
     stat["sub"] += len(wrong)
@@ -161,12 +173,12 @@ def _load_shard(path: Path) -> List[dict]:
 #                              core comparison                                #
 # ---------------------------------------------------------------------------#
 def analyse_variant(
-    ref_dir: Path,
-    hyp_seed_dirs: List[Path],
-    split: str,
-    version: int,
-    variant: Literal['v1', 'v2', 'v3', 'v4', 'v5', 'original'],
-    only_services: list[str] | None = None
+        ref_dir: Path,
+        hyp_seed_dirs: List[Path],
+        split: str,
+        version: int,
+        variant: Literal['v1', 'v2', 'v3', 'v4', 'v5', 'original'],
+        only_services: list[str] | None = None
 ) -> Dict[str, Dict[str, Dict[str, float]]]:
     """
     Return {service → slot → {tp,sub,fp,fn,ser}} aggregating *across seeds*.
@@ -257,10 +269,10 @@ def analyse_variant(
 #                               CLI + tables                                 #
 # ---------------------------------------------------------------------------#
 def build_dataframe(
-    nested: Dict[str, Dict[str, Dict[str, float]]],
-    variant: str
+        nested: Dict[str, Dict[str, Dict[str, float]]],
+        variant: str
 ) -> pd.DataFrame:
-    """Flatten one variant’s dict → DataFrame."""
+    """Flatten one variant's dict → DataFrame."""
     rows = []
     for srv, slot_dict in nested.items():
         for slot, m in slot_dict.items():
@@ -275,46 +287,102 @@ def build_dataframe(
     return pd.DataFrame(rows)
 
 
-def pretty_table(df: pd.DataFrame) -> Table:
-    tbl = Table(title="Slot-level Error Summary", box=box.SIMPLE_HEAVY)
-    tbl.add_column("Var", style="cyan", no_wrap=True)
-    tbl.add_column("Service", style="magenta")
-    tbl.add_column("Slot", style="green")
+def pretty_table(df: pd.DataFrame, baseline_df: pd.DataFrame | None = None) -> Table:
+    """Create a pretty table with optional baseline comparison."""
+    if baseline_df is not None:
+        title = "Slot-level Error Delta (experiment - baseline)"
+    else:
+        title = "Slot-level Error Summary"
+
+    tbl = Table(title=title, box=box.SIMPLE_HEAVY, width=200)
+    tbl.add_column("Var", style="cyan", no_wrap=True, width=8)
+    tbl.add_column("Service", style="magenta", width=12)
+    tbl.add_column("Slot", style="green", width=20)
+
+    # Set wider columns for metrics, especially when showing deltas
+    col_width = 16 if baseline_df is not None else 8
     for col in ("C", "S", "FN", "FP", "FNR", "FPR", "SubR", "SER"):
-        tbl.add_column(col, justify="right")
+        tbl.add_column(col, justify="right", width=col_width, no_wrap=True)
+
+    # Create a lookup for baseline values if provided
+    baseline_lookup = {}
+    if baseline_df is not None:
+        for _, row in baseline_df.iterrows():
+            key = (row.variant, row.service, row.slot)
+            baseline_lookup[key] = row
 
     for _, r in df.sort_values(["variant", "service", "slot"]).iterrows():
-        tbl.add_row(
-            str(r.variant), r.service, r.slot,
-            *(f"{r[col]:.3f}" if col in {"SER", "FNR", "FPR", "SubR"} else str(int(r[col]))
-              for col in ("C", "S", "FN", "FP", "FNR", "FPR", "SubR", "SER"))
-        )
+        row_values = []
+        row_values.extend([str(r.variant), r.service, r.slot])
+
+        # Get baseline values if available
+        baseline_row = None
+        if baseline_df is not None:
+            key = (r.variant, r.service, r.slot)
+            baseline_row = baseline_lookup.get(key)
+
+        for col in ("C", "S", "FN", "FP", "FNR", "FPR", "SubR", "SER"):
+            current_val = r[col]
+
+            if col in {"FNR", "FPR", "SubR", "SER"}:
+                # Convert rates to percentages for display
+                current_display = current_val * 100
+                format_str = f"{current_display:.1f}"
+
+                if baseline_row is not None:
+                    baseline_val = baseline_row[col] * 100
+                    diff = current_display - baseline_val
+                    diff_str = f"({diff:+.1f})" if diff != 0 else "(+0.0)"
+                    format_str = f"{current_display:.1f} {diff_str}"
+            else:
+                # Integer counts
+                format_str = str(int(current_val))
+
+                if baseline_row is not None:
+                    baseline_val = int(baseline_row[col])
+                    diff = int(current_val) - baseline_val
+                    diff_str = f"({diff:+d})" if diff != 0 else "(+0)"
+                    format_str = f"{int(current_val)} {diff_str}"
+
+            row_values.append(format_str)
+
+        tbl.add_row(*row_values)
+
     return tbl
 
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Slot-level error analysis for SGD / SGD-X")
-    p.add_argument("--refs-root",  type=Path, required=True,
+    p.add_argument("--refs-root", type=Path, required=True,
                    help="Root of references (data/raw)")
-    p.add_argument("--hyps-root",  type=Path, required=True,
+    p.add_argument("--hyps-root", type=Path, required=True,
                    help="Root of *one experiment* (contains seed_* dirs)")
-    p.add_argument("--variants",   nargs="+",
+    p.add_argument("--baseline-hyps-root", type=Path,
+                   help="Root of baseline experiment for comparison")
+    p.add_argument("--baseline-version", type=int,
+                   help="Version number for baseline (required if --baseline-hyps-root is specified)")
+    p.add_argument("--variants", nargs="+",
                    default=["original", "v1", "v2", "v3", "v4", "v5"],
                    help="Schema variants to analyse")
-    p.add_argument("--version",    type=int, default=9,
+    p.add_argument("--version", type=int, default=9,
                    help="Number in version_<N> (default: 9)")
-    p.add_argument("--split",      default="test",
+    p.add_argument("--split", default="test",
                    help="Data split (default: test)")
-    p.add_argument("--services",   nargs="*", help="Restrict to these services")
-    p.add_argument("--slots",      nargs="*", help="Restrict to these slots")
-    p.add_argument("--out",        type=Path,
+    p.add_argument("--services", nargs="*", help="Restrict to these services")
+    p.add_argument("--slots", nargs="*", help="Restrict to these slots")
+    p.add_argument("--out", type=Path,
                    help="Save full per-slot CSV here")
     return p.parse_args()
 
 
 def main(argv: List[str] | None = None) -> None:
-
     args = parse_args() if argv is None else parse_args(argv)
+
+    # Validate baseline arguments
+    if args.baseline_hyps_root and args.baseline_version is None:
+        console.print("[red]Error: --baseline-version is required when --baseline-hyps-root is specified[/red]")
+        sys.exit(1)
+
     global ALIASES
     ALIASES = build_aliases(args.refs_root, args.variants)
     seed_dirs = sorted(args.hyps_root.glob("seed_*"))
@@ -322,6 +390,7 @@ def main(argv: List[str] | None = None) -> None:
         console.print(f"[red]No seed_* dirs in {args.hyps_root}[/red]")
         sys.exit(1)
 
+    # Analyze main experiment
     frames = []
     for v in args.variants:
         ref_dir = args.refs_root / v
@@ -343,16 +412,47 @@ def main(argv: List[str] | None = None) -> None:
         sys.exit(1)
 
     df = pd.concat(frames, ignore_index=True)
-    # optional filtering -------------------------------------------------
+
+    # Analyze baseline if specified
+    baseline_df = None
+    if args.baseline_hyps_root:
+        baseline_seed_dirs = sorted(args.baseline_hyps_root.glob("seed_*"))
+        if not baseline_seed_dirs:
+            console.print(f"[red]No seed_* dirs in {args.baseline_hyps_root}[/red]")
+            sys.exit(1)
+
+        baseline_frames = []
+        for v in args.variants:
+            ref_dir = args.refs_root / v
+            if not ref_dir.exists():
+                continue
+            baseline_res = analyse_variant(
+                ref_dir,
+                baseline_seed_dirs,
+                split=args.split,
+                version=args.baseline_version,
+                variant=v,
+                only_services=args.services
+            )
+            baseline_frames.append(build_dataframe(baseline_res, v))
+
+        if baseline_frames:
+            baseline_df = pd.concat(baseline_frames, ignore_index=True)
+
+    # Optional filtering -------------------------------------------------
     if args.services:
         df = df[df.service.isin(args.services)]
+        if baseline_df is not None:
+            baseline_df = baseline_df[baseline_df.service.isin(args.services)]
     if args.slots:
         df = df[df.slot.isin(args.slots)]
+        if baseline_df is not None:
+            baseline_df = baseline_df[baseline_df.slot.isin(args.slots)]
 
-    # show table ---------------------------------------------------------
-    console.print(pretty_table(df))
+    # Show table ---------------------------------------------------------
+    console.print(pretty_table(df, baseline_df))
 
-    # optional CSV -------------------------------------------------------
+    # Optional CSV -------------------------------------------------------
     if args.out:
         df.to_csv(args.out, index=False)
         console.print(f"[green]Saved CSV to {args.out}[/green]")
