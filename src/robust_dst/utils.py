@@ -222,3 +222,8 @@ def load_json(path: Path):
     with open(path, "r") as f:
         data = json.load(f)
     return data
+
+def linear_thresholding(value: float, threshold: float = 0.0) -> float:
+    if value > threshold:
+        return value
+    return 0.0

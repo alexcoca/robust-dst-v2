@@ -7,3 +7,8 @@ reproduce:
     benchmark: True
 linearization_version: 'version_1'
 downsample_factor: 1
+preprocessing:
+  special_tokens:
+  - '[user]'
+  - '[system]'
+  - '[slot]'

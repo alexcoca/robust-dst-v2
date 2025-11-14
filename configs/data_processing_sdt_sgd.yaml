@@ -1,0 +1,10 @@
+metadata:
+  data_format: 'sdt_sgd'
+preprocessing:
+  special_tokens:
+    - "[user]"
+    - "[system]"
+    - "[example]"
+    - "[slots]"
+    - "[context]"
+    - "[state]"

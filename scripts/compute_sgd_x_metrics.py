@@ -125,7 +125,7 @@ def get_metric_sensitivity(scores: np.ndarray) -> float:
     "--original",
     "original",
     is_flag=True,
-    default=True,
+    default=False,
 )
 @click.option(
     "-a",
@@ -155,8 +155,9 @@ def main(
     frame_metric_paths = nested_defaultdict(list, depth=3)
     for model in models:
         for variant in schema_variants:
-            this_model_schema_variant_paths = list(
-                Path(hyps_source_dir, model, variant, _SPLIT, version).glob(
+            path_prefix = Path(hyps_source_dir, model, variant, _SPLIT, version)
+            logger.info(f"Path prefix: {path_prefix}")
+            this_model_schema_variant_paths = list(path_prefix.glob(
                     f"{_CHECKPOINT_PREFIX}*"
                 )
             )
@@ -187,6 +188,9 @@ def main(
     orig_test_schema_path = Path("data/raw/original/test/schema.json")
     in_domain_services = get_in_domain_services(
         orig_train_schema_path, orig_test_schema_path
+    )
+    logger.info(
+        f"In domain services: {in_domain_services}"
     )
     # Retrieve scores for all models, schema variant and optimization step
     # given a split and input data version
@@ -219,7 +223,10 @@ def main(
                                 this_step_idx_all_scores.append(
                                     frame["metrics"][metric]
                                 )
-                                if frame["service"][:-1] in in_domain_services:
+                                service_name = frame["service"]
+                                if not original:
+                                    service_name = service_name[:-1]
+                                if service_name in in_domain_services:
                                     this_step_idx_seen_scores.append(
                                         frame["metrics"][metric]
                                     )

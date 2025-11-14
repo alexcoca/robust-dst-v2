@@ -6,6 +6,7 @@ import logging
 import pathlib
 from itertools import chain
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Literal, Optional
 
 from omegaconf import DictConfig
@@ -171,7 +172,7 @@ def flatten_metrics_dict(sgd_metrics_dict: dict) -> dict[str, float]:
 
 
 def setup_sgd_evaluation(
-    data_args: DataTrainingArguments,
+    data_args: DataTrainingArguments | SimpleNamespace,
     preprocessing_configs: dict[str, DictConfig],
     raw_preprocessed_refs: dict[str, list[dict]],
     split: Literal["validation", "test"],
@@ -188,6 +189,7 @@ def setup_sgd_evaluation(
             data_args.max_predict_samples is not None,
         )
     ):
+        assert False, "Should not traverse this code path"
         files_decoded = get_dialogue_filenames(raw_preprocessed_refs[split])
         dialogues_decoded = get_dialogue_ids(raw_preprocessed_refs[split])
     schema_path = Path(getattr(data_args, f"{split}_ref_dir")).joinpath("schema.json")

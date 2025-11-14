@@ -12,7 +12,7 @@ from typing import Literal, Optional
 import click
 from omegaconf import DictConfig, OmegaConf
 
-from robust_dst.parser_metadata import SPECIAL_SLOT_VALUES
+from robust_dst.parser_metadata import ParserMetaMixin
 from robust_dst.utils import (
     get_datetime,
     infer_schema_variant_from_path,
@@ -20,6 +20,7 @@ from robust_dst.utils import (
     set_seed,
 )
 
+SPECIAL_SLOT_VALUES = ParserMetaMixin.SPECIAL_SLOT_VALUES
 logger = logging.getLogger(__name__)
 
 

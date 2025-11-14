@@ -526,6 +526,126 @@ class T5DSTParser(Parser):
             ] = values
         return default_to_regular(slot_value_predictions)
 
+class SDTParser(Parser):
+    NONE_TOKENS = ["NONE", "none"]
+    DONTCARE_TOKEN = "dontcare"
+    def __init__(
+            self,
+            template_dir: Union[str, pathlib.Path],
+            schema_path: Union[str, pathlib.Path],
+            data_format: Literal["google"],
+            files_to_parse: Optional[list[str]] = None,
+            dialogues_to_parse: Optional[list[str]] = None,
+    ):
+        super().__init__(
+            template_dir=template_dir,
+            schema_path=schema_path,
+            files_to_parse=files_to_parse,
+            dialogues_to_parse=dialogues_to_parse,
+        )
+        self.data_format = data_format
+    def _dialogue_id_to_file(self, dialogue_id: str) -> str:
+        """Infer the file name from the dialogue id
+        
+        dialogue_id is of format: '<file_number>_<dialogue_number>'
+        file name is of format: 'dialogues_{file_number}.json'
+        Note that file_number in file_name has to be a three digit number"""
+        file_number = dialogue_id.split("_")[0] # This is a string
+        number_of_zeros = 3 - len(file_number)
+        assert number_of_zeros in (0, 1, 2)
+        file_number = "0" * number_of_zeros + file_number
+        file_name = f"dialogues_{file_number}.json"
+        return file_name
+        
+    def _drop_none_slots(self, slots: dict[str, str]) -> dict[str, str]:
+        """Drop the slots whose values are NONE_TOKENS
+        """
+        return {slot: value for slot, value in slots.items() if value not in self.NONE_TOKENS}
+    
+    def _handle_categorical_slots(self, slots: dict[str, str], 
+                                  categorical_mapping: str,
+                                  dialogue_id: str) -> dict[str, str]:
+        """Handle categorical slots present in model output
+        """
+        # Categorical slots mapping is a dictionary but is stored as a string
+        # So we need to convert it to a dictionary
+        try:
+            mapping_dict = eval(categorical_mapping)
+        except SyntaxError:
+            logger.error(f"Syntax error in categorical slots mapping: {categorical_mapping}"
+                         f"for dialogue id: {dialogue_id}"
+                         "Cannot convert it to a dictionary and hence cannot handle categorical slots")
+            return slots
+        # Now that categorical slots mapping is a dictionary, we can handle the categorical slots
+        for slot, value in slots.items():
+            if slot not in mapping_dict:
+                continue # Ignore non-categorical slots
+            if value == self.DONTCARE_TOKEN:
+                continue
+            mapping = mapping_dict[slot].get(value, None)
+            if mapping is None: 
+                # So the output is diffent from the options present so just raise a warning
+                logger.warning(f"Value: {value} for slot: {slot} in dialogue id: {dialogue_id}"
+                                    "is not present in the options for the slot"
+                                    f"Options for the slot: {mapping_dict[slot]}")
+            # So the model output is present in the schema and isn't None
+            slots[slot] = mapping
+        return slots
+                  
+    
+    def _extract_slots_from_output(self, output: str,
+                                   dialogue_id: str) -> dict[str, str]:
+        """Extract the slot-value pairs from the output of the model
+        
+        In ideal case, the output of the model will be a string of the following format:
+        '[state] <slot_name_1>=<value_1> <slot_name_2>=<value_2> ...'
+        The extraction will be done without looking at the schema but just from the output string
+        """
+        slots = {}
+        # If output starts with '[state] ', remove it else return empty dict
+        start_format = r'\[state\](.*)'
+        start_match = re.search(start_format, output)
+        if not start_match: 
+            return slots # If the output does not start with '[state]' then ignore it
+        output = start_match.group(1).strip() # Remove the '[state]' from the output
+        
+        # Now that [state] is removed this regex will extract the slot-value pairs
+        # Slot name and values will be separated by '='
+        # slot names only inlcude alphanumeric characters and underscores
+        # value names include all characters except '=' 
+        # There is a space after the value until the next slot name
+        slot_value_pattern = r'(\w+)=((?:(?!\w+=).)+)'
+        matches = re.findall(slot_value_pattern, output)
+        slots = {slot.strip(): value.strip() for slot, value in matches}
+        return slots
+    def _map_values_to_slots(
+            self, 
+            preprocessed_refs: list[dict], 
+            predictions: list[str]) -> dict[str, dict[str, dict[str, dict[str, dict[str, list[str]]]]]]:
+        
+        #logger.info("Mapping predicted values to slot names...")
+        slot_value_predictions = nested_defaultdict(dict, depth=4)
+        for line_idx, (prediction, preprocessed_ref) in enumerate(
+            zip(predictions, preprocessed_refs)):
+            categorical_slots_mapping = preprocessed_ref["categorical_slots_mapping"]
+            dialogue_id = preprocessed_ref["dialogue_id"]
+            turn_id = preprocessed_ref["turn_id"]
+            frame_id = preprocessed_ref["frame_id"]
+            service = preprocessed_ref["service"]
+            file = self._dialogue_id_to_file(dialogue_id)
+            slots = self._extract_slots_from_output(prediction, dialogue_id)
+            slots = self._drop_none_slots(slots)
+            if categorical_slots_mapping: # i.e. Categorical slots isn't equal to None
+                slots = self._handle_categorical_slots(slots, categorical_slots_mapping, dialogue_id)
+            if len(slots) == 0:
+                slot_value_predictions[file][dialogue_id][turn_id][service] = {}
+                continue
+            for slot, value in slots.items():
+                assert (
+                    slot not in slot_value_predictions[file][dialogue_id][turn_id][service]
+                )
+                slot_value_predictions[file][dialogue_id][turn_id][service][slot] = [value]
+        return default_to_regular(slot_value_predictions)
 
 class D3STParser(Parser):
     MAX_PARSED_SUBSTRINGS = 30

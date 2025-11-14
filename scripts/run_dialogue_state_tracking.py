@@ -40,7 +40,7 @@ from transformers import (
     HfArgumentParser,
     get_constant_schedule_with_warmup,
     is_wandb_available,
-    set_seed,
+    set_seed, PreTrainedTokenizerFast,
 )
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
@@ -53,8 +53,8 @@ from robust_dst.cli import (
     ModelArguments,
 )
 from robust_dst.evaluation import get_metrics
-from robust_dst.parser import D3STParser, T5DSTParser
-from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor
+from robust_dst.parser import D3STParser, T5DSTParser, SDTParser
+from robust_dst.preprocessor import D3STPreprocessor, T5DSTPreprocessor, SDTPreprocessor
 from robust_dst.scoring_utils import (
     flatten_metrics_dict,
     setup_evaluator_output_dirs,
@@ -94,12 +94,21 @@ def main():
         # parse arguments passed in a .json file
         json_file_path = os.path.abspath(sys.argv[-1])
         logger.info(f"Parsing arguments in .json format at path {json_file_path}")
+        with open(json_file_path, 'r') as f:
+            json_args = json.load(f)
+        logger.info(f"JSON content: {json_args}")
+        logger.warning(f"The following arguments were specified in json: {json_file_path}")
         model_args, data_args, training_args = arg_parser.parse_json_file(
             json_file=json_file_path
         )
     else:
         logger.info("Parsing arguments into dataclasses")
         model_args, data_args, training_args = arg_parser.parse_args_into_dataclasses()
+    training_args = training_args.set_logging(
+        level="info",
+        replica_level="info",
+        report_to=training_args.report_to
+    )
     if not Path(model_args.cache_dir).exists():
         Path(model_args.cache_dir).resolve().mkdir(parents=True, exist_ok=True)
     if training_args.do_predict and training_args.do_eval:
@@ -164,6 +173,11 @@ def main():
                 "logs", model_input_data_version, f"{Path(__file__).stem}.log"
             )
             file_handler = logging.FileHandler(logs_dir, mode="a")
+
+    transformers.utils.logging.enable_default_handler()
+    transformers.utils.logging.enable_explicit_format()
+    log_level = training_args.get_process_log_level()
+
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
@@ -172,14 +186,13 @@ def main():
             file_handler,
         ],
         force=True,
+        level=log_level
     )
-    log_level = training_args.get_process_log_level()
     logging.getLogger().setLevel(log_level)
     logger.setLevel(log_level)
     datasets.utils.logging.set_verbosity(log_level)
     transformers.utils.logging.set_verbosity(log_level)
-    transformers.utils.logging.enable_default_handler()
-    transformers.utils.logging.enable_explicit_format()
+
     # Log on each process the small summary:
     logger.warning(
         f"Process rank: {training_args.local_rank}, device: {training_args.device},"
@@ -188,7 +201,6 @@ def main():
         f" training: {training_args.fp16}"
     )
     logger.info(f"Training/evaluation parameters {training_args}")
-
     # Detecting last checkpoint.
     last_checkpoint = None
     if (
@@ -273,7 +285,7 @@ def main():
         config.max_length = data_args.val_max_target_length
     if data_args.num_beams is not None:
         config.num_beams = data_args.num_beams
-
+    logger.info(f"Using fast tokenizer: {model_args.use_fast_tokenizer}")
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name
         if model_args.tokenizer_name
@@ -283,6 +295,7 @@ def main():
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
     )
+    assert isinstance(tokenizer, PreTrainedTokenizerFast)
     model = AutoModelForSeq2SeqLM.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -399,6 +412,10 @@ def main():
             domain_in_desc=domain_in_desc,
             **preprocessor_init_kwargs,
         )
+    elif "sdt" in data_format:
+        preprocessor = SDTPreprocessor(
+            **preprocessor_init_kwargs,
+        )
     else:
         preprocessor = T5DSTPreprocessor(
             **preprocessor_init_kwargs,
@@ -410,8 +427,11 @@ def main():
         train_dataset = raw_datasets["train"]
         if data_args.max_train_samples is not None:
             train_dataset = train_dataset.select(range(data_args.max_train_samples))
-        logger.info(
+        logger.warning(
             f"Processing training dataset, KST augmentation: {data_args.augment_style}"
+        )
+        logger.warning(
+            f"Processing training dataset, discard truncated examples: {data_args.discard_truncated_examples}"
         )
         with training_args.main_process_first(
             local=False, desc="train dataset map pre-processing"
@@ -420,13 +440,10 @@ def main():
                 train_dataset,
                 desc="Running tokenizer on train dataset",
                 augment_style=data_args.augment_style,
+                truncation=True,
                 omit_confirmation_turns=data_args.omit_confirmation_turns,
                 discard_truncated_examples=data_args.discard_truncated_examples,
             )
-            if data_args.augment_style != "NONE":
-                # this is tokenized so the tokenizer needs to be loaded to detokenize
-                # the data
-                train_dataset.to_json(f"{training_args.output_dir}/train_dataset.json")
 
     if training_args.do_eval:
         preprocessor.max_target_length = data_args.val_max_target_length
@@ -442,6 +459,7 @@ def main():
         ):
             eval_dataset = preprocessor.process(
                 eval_dataset,
+                truncation=False,
                 desc="Running tokenizer on validation dataset",
             )
         parser_inputs, sgd_evaluator_inputs = setup_sgd_evaluation(
@@ -555,6 +573,10 @@ def main():
             restore_categorical_case=parser_inputs["preproc_config"]["lowercase"],
             **parser_init_kwargs,
         )
+    elif "sdt" in data_format:
+        parser = SDTParser(
+            data_format=data_format,
+            **parser_init_kwargs)
     else:
         parser = T5DSTParser(
             data_format=data_format,
@@ -671,7 +693,35 @@ def main():
         if training_args.predict_with_generate
         else None,
     )
+    if data_args.augment_style != "NONE":
+        # this is tokenized so the tokenizer needs to be loaded to detokenize
+        # the data
 
+        if training_args.local_rank in (-1, 0):  # run once
+            logger.info("Writing human-readable dataset to disk")
+            readable_path = Path(training_args.output_dir).absolute() / "train_readable.jsonl"
+            logger.info(f"Dataset will be dumped at {readable_path}")
+            label_pad = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
+
+            with readable_path.open("w", encoding="utf-8") as f:
+                for ex in train_dataset:
+                    # remove padding / ignore tokens from the label stream
+                    label_ids = [i for i in ex["labels"] if i != label_pad]
+
+                    record = {
+                        "input_text": tokenizer.decode(
+                            ex["input_ids"],
+                            skip_special_tokens=False
+                        ),
+                        "target_text": tokenizer.decode(
+                            label_ids,
+                            skip_special_tokens=False
+                        ),
+                    }
+                    f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+            logger.info(f"Wrote human-readable training set to {readable_path}")
+        # train_dataset.to_json(f"{training_args.output_dir}/train_dataset.json")
     def create_and_save_model_config(path: Union[str, Path]) -> None:
         config = {
             "data": preprocessing_configs,
@@ -693,7 +743,6 @@ def main():
         model_config = OmegaConf.create(config)
         # needed for post-hoc parsing of raw predictions
         OmegaConf.save(config=model_config, f=path)
-
 
     # Training
     if training_args.do_train:

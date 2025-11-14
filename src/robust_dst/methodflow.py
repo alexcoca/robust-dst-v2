@@ -7,7 +7,6 @@ from typing import Any, Callable, Literal, Optional
 
 logger = logging.getLogger(__name__)
 
-
 class ProcessStep:
     """Wrapper of Callable, with info to build the pipeline."""
 
